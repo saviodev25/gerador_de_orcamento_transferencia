@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Orçamento Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --app-primary: #1f2937; /* Cinza escuro para a interface do app */
+            --gold: #D4AF37;       /* Dourado Metálico */
+            --black: #111111;
+            --white: #ffffff;
+            --bg: #f3f4f6;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--black);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { margin-top: 0; font-size: 1.5rem; text-align: center; color: var(--app-primary); }
+
+        /* --- ESTILOS DO FORMULÁRIO --- */
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
+        
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        #plate { text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+
+        .services-list { display: grid; gap: 10px; margin-top: 15px; }
+
+        .service-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            transition: all 0.2s;
+        }
+        
+        .service-header { display: flex; align-items: center; width: 100%; cursor: pointer; }
+        .service-header input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); accent-color: var(--gold); }
+        .service-name { flex-grow: 1; }
+        .price-tag { font-weight: bold; color: var(--app-primary); }
+
+        /* Campos editáveis */
+        .editable-inputs {
+            display: none;
+            margin-top: 10px;
+            gap: 10px;
+            grid-template-columns: 2fr 1fr;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .service-item.active { background-color: #fffbf0; border-color: var(--gold); }
+        .service-item.active .editable-inputs { display: grid; }
+
+        .section-title {
+            margin-top: 20px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--black);
+            color: var(--gold);
+            border: 1px solid var(--black);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-outline { background: transparent; border: 2px solid var(--black); color: var(--black); }
+        .btn-outline:hover { background: #eee; }
+
+        /* --- ESTILOS DO RESULTADO (DESIGN PREMIUM) --- */
+        #result-screen { display: none; }
+        
+        .budget-paper {
+            background: white;
+            padding: 40px;
+            /* Simula uma folha de papel clean */
+            border: 1px solid #e5e5e5;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        /* Detalhe Dourado no Topo */
+        .budget-paper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: var(--gold);
+        }
+
+        .budget-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--black);
+        }
+
+        .budget-title {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            color: var(--gold);
+            text-transform: uppercase;
+            font-weight: 700;
+            text-shadow: 0px 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .plate-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--black);
+            margin: 10px 0;
+            letter-spacing: 2px;
+        }
+
+        .budget-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        
+        .budget-table th {
+            text-align: left;
+            padding: 12px;
+            background-color: var(--black);
+            color: var(--gold);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .budget-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .budget-table td:last-child {
+            text-align: right;
+            font-weight: 700;
+            color: var(--black);
+            white-space: nowrap;
+        }
+
+        .total-row {
+            background-color: var(--gold);
+            color: var(--black);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+        .full-width { grid-column: span 2; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="form-screen">
+            <h1>Novo Orçamento</h1>
+            
+            <div class="form-group">
+                <label>Placa do Veículo</label>
+                <input type="text" id="plate" placeholder="AAA-1234" maxlength="8">
+            </div>
+
+            <div class="section-title">Serviços Fixos</div>
+            <div class="services-list" id="services-container">
+                </div>
+
+            <div class="section-title">Serviços Variáveis</div>
+            <div class="services-list">
+                
+                <div class="service-item" id="honorarios-item">
+                    <div class="service-header" onclick="toggleEditable('honorarios-chk', 'honorarios-item')">
+                        <input type="checkbox" id="honorarios-chk">
+                        <span class="service-name">Honorários (Serviço)</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="honorarios-desc" value="Serviço (Honorários)">
+                        <input type="number" id="honorarios-price" value="120.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="placa-moto-item">
+                    <div class="service-header" onclick="toggleEditable('placa-moto-chk', 'placa-moto-item')">
+                        <input type="checkbox" id="placa-moto-chk">
+                        <span class="service-name">Placa Mercosul (Moto)</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="placa-moto-desc" value="Placa Mercosul (Moto)">
+                        <input type="number" id="placa-moto-price" value="198.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="placa-carro-item">
+                    <div class="service-header" onclick="toggleEditable('placa-carro-chk', 'placa-carro-item')">
+                        <input type="checkbox" id="placa-carro-chk">
+                        <span class="service-name">Placa Mercosul (Carro)</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="placa-carro-desc" value="Placas Mercosul (Carro)">
+                        <input type="number" id="placa-carro-price" value="335.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="licensing-item">
+                    <div class="service-header" onclick="toggleEditable('licensing-chk', 'licensing-item')">
+                        <input type="checkbox" id="licensing-chk">
+                        <span class="service-name">Licenciamento</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="licensing-desc" value="Licenciamento 2026">
+                        <input type="number" id="licensing-price" value="181.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="others-item">
+                    <div class="service-header" onclick="toggleEditable('others-chk', 'others-item')">
+                        <input type="checkbox" id="others-chk">
+                        <span class="service-name" style="color:#D4AF37; font-weight:bold;">OUTROS / EXTRA</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="others-desc" placeholder="Descrição do serviço extra">
+                        <input type="number" id="others-price" placeholder="Valor" step="0.01">
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="btn" onclick="generateBudget()">GERAR ORÇAMENTO</button>
+        </div>
+
+        <div id="result-screen">
+            <h1>Pronto!</h1>
+            
+            <div id="capture-area" class="budget-paper">
+                <div class="budget-header">
+                    <h2 class="budget-title">ORÇAMENTO</h2>
+                    <p class="plate-display" id="display-plate">AAA-0000</p>
+                    <p style="margin:0; font-size: 0.9rem; color: #555;">Data: <span id="display-date"></span></p>
+                </div>
+
+                <table class="budget-table">
+                    <thead>
+                        <tr>
+                            <th>Descrição dos Serviços</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budget-items">
+                        </tbody>
+                </table>
+
+                <div class="total-row">
+                    <span>TOTAL</span>
+                    <span id="display-total">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" style="background-color: #25D366; border-color:#25D366; color:white;" onclick="copyToClipboard()">
+                    WhatsApp (Texto)
+                </button>
+                <button class="btn" onclick="downloadImage()">
+                    Baixar Imagem
+                </button>
+                <button class="btn btn-outline full-width" onclick="editBudget()">
+                    Voltar / Editar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURAÇÃO DOS SERVIÇOS FIXOS ---
+        // Removi os serviços que viraram editáveis (Serviço, Placas) desta lista
+        const servicesData = [
+            { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
+            { id: 'transf_cidade', name: 'Transferência de Cidade', price: 167.00 },
+            { id: 'transf_bahia', name: 'Transf. para Estado da Bahia', price: 328.00 },
+            { id: 'web', name: 'Web + Digitalização', price: 89.00 }, // Será marcado por padrão
+            { id: 'desalienacao', name: 'Desalienação', price: 91.00 },
+            { id: 'alienacao', name: 'Alienação', price: 91.00 },
+            { id: 'atpv', name: 'Atpv-e', price: 95.00 },
+            { id: 'vistoria', name: 'Vistoria', price: 350.00 },
+            { id: 'mudanca_cat', name: 'Mudança de Categoria', price: 324.00 },
+            { id: 'alt_carac', name: 'Alteração de Característica', price: 149.00 },
+            { id: 'segunda_crv', name: '2ª via CRV', price: 107.00 },
+            { id: 'regrav_vin', name: 'Regravação de Vin (Chassi)', price: 175.00 },
+            { id: 'grav_motor', name: 'Gravação, Regravação de Motor', price: 175.00 },
+            { id: 'subst_motor', name: 'Substituição de Motor', price: 324.00 }
+        ];
+
+        // --- 2. INICIALIZAÇÃO ---
+        window.onload = function() {
+            const container = document.getElementById('services-container');
+            
+            servicesData.forEach(service => {
+                const div = document.createElement('div');
+                div.className = 'service-item';
+                
+                // Lógica para marcar "Web" por padrão
+                const isChecked = service.id === 'web' ? 'checked' : '';
+                
+                div.innerHTML = `
+                    <div class="service-header" onclick="this.querySelector('input').click()">
+                        <input type="checkbox" value="${service.price}" data-name="${service.name}" class="std-service" ${isChecked}>
+                        <span class="service-name">${service.name}</span>
+                        <span class="price-tag">${formatMoney(service.price)}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        };
+
+        // --- 3. LÓGICA DE INTERFACE ---
+        function toggleEditable(checkboxId, containerId) {
+            const checkbox = document.getElementById(checkboxId);
+            const container = document.getElementById(containerId);
+            setTimeout(() => {
+                if (checkbox.checked) {
+                    container.classList.add('active');
+                    // Tenta focar no input de preço para agilizar
+                    const inputs = container.querySelectorAll('input[type="number"]');
+                    if(inputs.length > 0) inputs[0].select(); 
+                } else {
+                    container.classList.remove('active');
+                }
+            }, 10);
+        }
+
+        function formatMoney(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // --- 4. GERAÇÃO DO ORÇAMENTO ---
+        function generateBudget() {
+            const plate = document.getElementById('plate').value.toUpperCase();
+            if(!plate) { alert("Por favor, digite a placa do veículo."); return; }
+
+            const budgetItems = [];
+            let total = 0;
+
+            // Coleta itens da lista padrão
+            document.querySelectorAll('.std-service:checked').forEach(chk => {
+                const price = parseFloat(chk.value);
+                budgetItems.push({ name: chk.getAttribute('data-name'), price: price });
+                total += price;
+            });
+
+            // Função auxiliar para coletar itens editáveis
+            function collectEditable(chkId, descId, priceId) {
+                const chk = document.getElementById(chkId);
+                if(chk.checked) {
+                    const name = document.getElementById(descId).value;
+                    // Corrige virgula para ponto caso o usuario digite manual
+                    const valStr = document.getElementById(priceId).value.replace(',','.'); 
+                    const price = parseFloat(valStr) || 0;
+                    budgetItems.push({ name: name, price: price });
+                    total += price;
+                }
+            }
+
+            // Coleta os editáveis
+            collectEditable('honorarios-chk', 'honorarios-desc', 'honorarios-price');
+            collectEditable('placa-moto-chk', 'placa-moto-desc', 'placa-moto-price');
+            collectEditable('placa-carro-chk', 'placa-carro-desc', 'placa-carro-price');
+            collectEditable('licensing-chk', 'licensing-desc', 'licensing-price');
+            collectEditable('others-chk', 'others-desc', 'others-price');
+
+            if(budgetItems.length === 0) { alert("Selecione ao menos um serviço."); return; }
+
+            // Preenche o HTML do Resultado
+            const tbody = document.getElementById('budget-items');
+            tbody.innerHTML = '';
+            
+            budgetItems.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${formatMoney(item.price)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('display-plate').innerText = plate;
+            document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR');
+            document.getElementById('display-total').innerText = formatMoney(total);
+
+            // Troca tela
+            document.getElementById('form-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+        }
+
+        function editBudget() {
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('form-screen').style.display = 'block';
+        }
+
+        // --- 5. EXPORTAÇÃO ---
+        function copyToClipboard() {
+            const plate = document.getElementById('display-plate').innerText;
+            const rows = document.querySelectorAll('#budget-items tr');
+            const total = document.getElementById('display-total').innerText;
+            
+            let text = `*${plate}*\n\n`;
+            
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                // Adiciona espaço invisivel para alinhar melhor no zap se precisar
+                text += `${cols[0].innerText}: ${cols[1].innerText}\n`;
+            });
+
+            text += `\n*TOTAL = ${total}*`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Orçamento copiado! Pode colar no WhatsApp.");
+            });
+        }
+
+        function downloadImage() {
+            const element = document.getElementById('capture-area');
+            // Aumentei a escala para 3 para ficar bem nitido (HD)
+            html2canvas(element, { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Orcamento_${document.getElementById('plate').value}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
