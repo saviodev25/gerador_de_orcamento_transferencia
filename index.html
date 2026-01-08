@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Orçamento Premium</title>
+    <title>Sistema Emplacadora - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -15,6 +15,7 @@
             --white: #ffffff;
             --bg: #f3f4f6;
             --border: #e5e7eb;
+            --error: #ef4444;
         }
 
         body {
@@ -25,6 +26,8 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            align-items: center; /* Centraliza verticalmente o login */
+            min-height: 100vh;
         }
 
         .container {
@@ -38,18 +41,23 @@
 
         h1 { margin-top: 0; font-size: 1.5rem; text-align: center; color: var(--app-primary); }
 
+        /* --- TELAS (LOGIN vs APP) --- */
+        #app-screen { display: none; } /* Escondido por padrão */
+        #login-screen { display: block; }
+
         /* --- ESTILOS DO FORMULÁRIO --- */
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
         
-        input[type="text"], input[type="number"], select {
+        input[type="text"], input[type="password"], input[type="number"], select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 1rem;
             box-sizing: border-box;
             background-color: #fff;
+            margin-bottom: 10px;
         }
         
         #plate { text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
@@ -71,7 +79,6 @@
         .service-name { flex-grow: 1; }
         .price-tag { font-weight: bold; color: var(--app-primary); }
 
-        /* Campos editáveis */
         .editable-inputs {
             display: none;
             margin-top: 10px;
@@ -98,7 +105,7 @@
         .live-total {
             margin-top: 25px;
             padding: 15px;
-            background-color: #e5e7eb; /* Cinza claro */
+            background-color: #e5e7eb;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
@@ -130,6 +137,8 @@
         .btn:hover { opacity: 0.9; }
         .btn-outline { background: transparent; border: 2px solid var(--black); color: var(--black); }
         .btn-outline:hover { background: #eee; }
+
+        .error-msg { color: var(--error); text-align: center; margin-top: 10px; display: none; font-weight: bold;}
 
         /* --- ESTILOS DO RESULTADO --- */
         #result-screen { display: none; }
@@ -214,6 +223,15 @@
             border-radius: 4px;
         }
 
+        .attendant-signature {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
         .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
         .full-width { grid-column: span 2; }
     </style>
@@ -221,8 +239,30 @@
 <body>
 
     <div class="container">
-        <div id="form-screen">
-            <h1>Novo Orçamento</h1>
+        
+        <div id="login-screen">
+            <h1 style="color: var(--gold);">ACESSO RESTRITO</h1>
+            <p style="text-align:center; margin-bottom: 30px;">Entre com suas credenciais de colaborador pexe</p>
+            
+            <div class="form-group">
+                <label>Usuário (Iniciais)</label>
+                <input type="text" id="login-user" placeholder="Ex: SS" style="text-transform: uppercase;">
+            </div>
+            
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="login-pass" placeholder="Sua senha">
+            </div>
+
+            <button class="btn" onclick="performLogin()">ENTRAR</button>
+            <p class="error-msg" id="login-error">Usuário ou senha incorretos.</p>
+        </div>
+
+        <div id="app-screen">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h1 style="margin:0; font-size:1.2rem;">Novo Orçamento</h1>
+                <span id="attendant-badge" style="background:#eee; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold;"></span>
+            </div>
             
             <div class="form-group">
                 <label>Placa do Veículo</label>
@@ -261,7 +301,7 @@
                         <span class="service-name">Licenciamento</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="licensing-desc" value="LICENCIAMENTO E IPVA">
+                        <input type="text" id="licensing-desc" value="Licenciamento e IPVA 2026 (IPVA 2026 com 15% de desconto até 10/02)">
                         <input type="number" id="licensing-price" value="181.00" step="0.01">
                     </div>
                 </div>
@@ -357,6 +397,10 @@
                     <span>TOTAL</span>
                     <span id="display-total">R$ 0,00</span>
                 </div>
+
+                <div class="attendant-signature">
+                    Atendente: <span id="display-attendant"></span>
+                </div>
             </div>
 
             <div class="actions">
@@ -374,6 +418,46 @@
     </div>
 
     <script>
+        // --- 0. SISTEMA DE LOGIN ---
+        // Adicione aqui os usuários da sua equipe
+        const team = [
+            { user: 'SS', pass: 'pexe', name: 'Sávio Santos' },
+            { user: 'LM', pass: 'pexe', name: 'Lucas Machado' }, 
+            { user: 'TS', pass: 'pexe', name: 'Thiago Souza' }, 
+            { user: 'NG', pass: 'pexe', name: 'Nilo Guimarães' },
+            { user: 'LC', pass: 'pexe', name: 'Levi Costa' },
+            { user: 'AL', pass: 'pexe', name: 'Alex Felix' },
+            { user: 'IA', pass: 'pexe', name: 'Italo Anjos' },
+            { user: 'A', pass: 'pexe', name: 'Augusto' },
+        ];
+
+        let currentAttendant = '';
+
+        function performLogin() {
+            const userIn = document.getElementById('login-user').value.toUpperCase().trim();
+            const passIn = document.getElementById('login-pass').value.trim();
+            const errorMsg = document.getElementById('login-error');
+
+            const foundUser = team.find(u => u.user === userIn && u.pass === passIn);
+
+            if (foundUser) {
+                // Login Sucesso
+                currentAttendant = foundUser.name;
+                document.getElementById('attendant-badge').innerText = `👤 ${foundUser.name}`;
+                document.getElementById('display-attendant').innerText = foundUser.name;
+                
+                // Troca Tela
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                
+                // Remove erro se houver
+                errorMsg.style.display = 'none';
+            } else {
+                // Login Erro
+                errorMsg.style.display = 'block';
+            }
+        }
+
         // --- 1. CONFIGURAÇÃO DOS SERVIÇOS FIXOS ---
         const servicesData = [
             { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
@@ -395,8 +479,6 @@
         // --- 2. INICIALIZAÇÃO ---
         window.onload = function() {
             const container = document.getElementById('services-container');
-            
-            // Lista de IDs que devem vir marcados por padrão na Transferência
             const defaultChecked = ['transf_nome', 'web', 'vistoria'];
 
             servicesData.forEach(service => {
@@ -404,7 +486,6 @@
                 div.className = 'service-item';
                 div.id = `row-${service.id}`; 
                 
-                // Marca se estiver na lista de padrões
                 const isChecked = defaultChecked.includes(service.id) ? 'checked' : '';
                 
                 div.innerHTML = `
@@ -417,7 +498,6 @@
                 container.appendChild(div);
             });
 
-            // Inicializa visualmente os serviços variáveis marcados
             ['honorarios-chk'].forEach(id => {
                 const chk = document.getElementById(id);
                 if(chk && chk.checked) {
@@ -426,42 +506,33 @@
                 }
             });
 
-            // Adiciona escuta geral para atualizar total em tempo real
-            document.getElementById('form-screen').addEventListener('input', calculateLiveTotal);
-            calculateLiveTotal(); // Calcula inicial
+            document.getElementById('app-screen').addEventListener('input', calculateLiveTotal);
+            calculateLiveTotal();
         };
 
-        // --- 3. LÓGICA DE TIPO DE SERVIÇO ---
+        // --- 3. LÓGICA DE SERVIÇOS ---
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
-
-            // Itens de Transferência
             const transfItems = ['transf_nome', 'transf_cidade', 'transf_bahia'];
-            // Item de 2ª Via
             const crvRow = document.getElementById('row-segunda_crv');
             const crvCheckbox = crvRow.querySelector('input');
 
             if (type === 'segunda_via') {
-                // Esconde transf e desmarca
                 transfItems.forEach(id => {
                     const row = document.getElementById(`row-${id}`);
                     row.style.display = 'none';
                     row.querySelector('input').checked = false;
                 });
-                // Marca 2ª via
                 crvCheckbox.checked = true;
-
             } else {
-                // Mostra transf e marca padrão (Nome)
                 transfItems.forEach(id => {
                     const row = document.getElementById(`row-${id}`);
                     row.style.display = 'flex';
                     if(id === 'transf_nome') row.querySelector('input').checked = true;
                 });
-                // Desmarca 2ª via
                 crvCheckbox.checked = false;
             }
-            calculateLiveTotal(); // Recalcula
+            calculateLiveTotal();
         }
 
         function toggleEditable(checkboxId, containerId) {
@@ -475,23 +546,17 @@
                 } else {
                     container.classList.remove('active');
                 }
-                calculateLiveTotal(); // Recalcula ao marcar/desmarcar
+                calculateLiveTotal();
             }, 10);
         }
 
-        // --- 4. TOTAL EM TEMPO REAL ---
         function calculateLiveTotal() {
             let total = 0;
-
-            // 1. Serviços Fixos
             document.querySelectorAll('.std-service:checked').forEach(chk => {
                 const parentRow = chk.closest('.service-item');
-                if(parentRow.style.display !== 'none') {
-                    total += parseFloat(chk.value);
-                }
+                if(parentRow.style.display !== 'none') total += parseFloat(chk.value);
             });
 
-            // 2. Serviços Variáveis (Função auxiliar)
             function sumEditable(chkId, priceId) {
                 const chk = document.getElementById(chkId);
                 if(chk && chk.checked) {
@@ -515,7 +580,7 @@
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // --- 5. GERAÇÃO DO ORÇAMENTO ---
+        // --- 4. GERAÇÃO DE ORÇAMENTO ---
         function generateBudget() {
             const plate = document.getElementById('plate').value.toUpperCase();
             if(!plate) { alert("Por favor, digite a placa do veículo."); return; }
@@ -523,7 +588,6 @@
             const budgetItems = [];
             let total = 0;
 
-            // Coleta Fixos
             document.querySelectorAll('.std-service:checked').forEach(chk => {
                 const parentRow = chk.closest('.service-item');
                 if(parentRow.style.display !== 'none') {
@@ -533,7 +597,6 @@
                 }
             });
 
-            // Coleta Variáveis
             function collectEditable(chkId, descId, priceId) {
                 const chk = document.getElementById(chkId);
                 if(chk && chk.checked) {
@@ -555,48 +618,39 @@
 
             if(budgetItems.length === 0) { alert("Selecione ao menos um serviço."); return; }
 
-            // Preenche Tabela
             const tbody = document.getElementById('budget-items');
             tbody.innerHTML = '';
             
             budgetItems.forEach(item => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td>${formatMoney(item.price)}</td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr><td>${item.name}</td><td>${formatMoney(item.price)}</td></tr>`;
             });
 
             document.getElementById('display-plate').innerText = plate;
             document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR');
             document.getElementById('display-total').innerText = formatMoney(total);
             
-            // Cabeçalho Visual
             const typeSelect = document.getElementById('budget-type');
             document.getElementById('display-type').innerText = typeSelect.options[typeSelect.selectedIndex].text.toUpperCase();
 
-            // Troca tela
-            document.getElementById('form-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'block';
         }
 
         function editBudget() {
             document.getElementById('result-screen').style.display = 'none';
-            document.getElementById('form-screen').style.display = 'block';
+            document.getElementById('app-screen').style.display = 'block';
         }
 
-        // --- 6. EXPORTAÇÃO ---
+        // --- 5. EXPORTAÇÃO ---
         function copyToClipboard() {
             const plate = document.getElementById('display-plate').innerText;
             const rows = document.querySelectorAll('#budget-items tr');
             const total = document.getElementById('display-total').innerText;
             const type = document.getElementById('budget-type').value;
             
-            // Título Personalizado no WhatsApp
             let text = "";
             if (type === 'segunda_via') {
-                text = `*${plate}*\n*Segunda via de DUT:*\n`;
+                text = `*${plate}*\n*Segunda via de DUT:*\n\n`;
             } else {
                 text = `*${plate}*\n`;
             }
@@ -607,7 +661,6 @@
             });
 
             text += `*TOTAL = ${total}*`;
-
             navigator.clipboard.writeText(text).then(() => {
                 alert("Orçamento copiado para WhatsApp!");
             });
