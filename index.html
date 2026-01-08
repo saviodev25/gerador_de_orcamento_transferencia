@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Orçamento Prime LM</title>
+    <title>Gerador de Orçamento Premium</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -94,6 +94,26 @@
             font-weight: bold;
         }
 
+        /* --- TOTAL EM TEMPO REAL --- */
+        .live-total {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e5e7eb; /* Cinza claro */
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+            color: var(--app-primary);
+            border: 1px solid #d1d5db;
+        }
+        
+        .live-total span:last-child {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--black);
+        }
+
         .btn {
             width: 100%;
             padding: 14px;
@@ -104,7 +124,7 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 25px;
+            margin-top: 15px;
             transition: opacity 0.2s;
         }
         .btn:hover { opacity: 0.9; }
@@ -241,8 +261,8 @@
                         <span class="service-name">Licenciamento</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="licensing-desc" value="LICENCIAMENTO E IPVA 2026">
-                        <input type="number" id="licensing-price" value="" step="0.01">
+                        <input type="text" id="licensing-desc" value="LICENCIAMENTO E IPVA">
+                        <input type="number" id="licensing-price" value="181.00" step="0.01">
                     </div>
                 </div>
 
@@ -252,7 +272,7 @@
                         <span class="service-name" style="color:#d32f2f;">MULTAS</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="multas-desc" placeholder="Qtd de multas" value="">
+                        <input type="text" id="multas-desc" placeholder="Descrição da Multa" value="">
                         <input type="number" id="multas-price" placeholder="Valor total multas" step="0.01">
                     </div>
                 </div>
@@ -301,6 +321,11 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div class="live-total">
+                <span>Total Estimado:</span>
+                <span id="live-total-value">R$ 0,00</span>
             </div>
 
             <button class="btn" onclick="generateBudget()">GERAR ORÇAMENTO</button>
@@ -353,7 +378,7 @@
         const servicesData = [
             { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
             { id: 'transf_cidade', name: 'Transferência de Cidade', price: 167.00 },
-            { id: 'transf_bahia', name: 'Transferência de Estado', price: 328.00 },
+            { id: 'transf_bahia', name: 'Transf. para Estado da Bahia', price: 328.00 },
             { id: 'web', name: 'Web + Digitalização', price: 89.00 },
             { id: 'desalienacao', name: 'Desalienação', price: 91.00 },
             { id: 'alienacao', name: 'Alienação', price: 91.00 },
@@ -392,7 +417,7 @@
                 container.appendChild(div);
             });
 
-            // Inicializa visualmente os serviços variáveis que já vêm marcados no HTML (Honorários)
+            // Inicializa visualmente os serviços variáveis marcados
             ['honorarios-chk'].forEach(id => {
                 const chk = document.getElementById(id);
                 if(chk && chk.checked) {
@@ -400,43 +425,43 @@
                     container.classList.add('active');
                 }
             });
+
+            // Adiciona escuta geral para atualizar total em tempo real
+            document.getElementById('form-screen').addEventListener('input', calculateLiveTotal);
+            calculateLiveTotal(); // Calcula inicial
         };
 
-        // --- 3. LÓGICA DE TIPO DE SERVIÇO (Transferência vs 2ª Via) ---
+        // --- 3. LÓGICA DE TIPO DE SERVIÇO ---
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
 
-            // Itens de Transferência (que somem na 2ª via)
+            // Itens de Transferência
             const transfItems = ['transf_nome', 'transf_cidade', 'transf_bahia'];
-            
-            // Item de 2ª Via (que aparece/marca na 2ª via)
+            // Item de 2ª Via
             const crvRow = document.getElementById('row-segunda_crv');
             const crvCheckbox = crvRow.querySelector('input');
 
             if (type === 'segunda_via') {
-                // 1. Esconde e desmarca os de transferência
+                // Esconde transf e desmarca
                 transfItems.forEach(id => {
                     const row = document.getElementById(`row-${id}`);
                     row.style.display = 'none';
                     row.querySelector('input').checked = false;
                 });
-
-                // 2. Marca automaticamente a 2ª Via CRV
+                // Marca 2ª via
                 crvCheckbox.checked = true;
 
             } else {
-                // Modo Transferência
-                // 1. Mostra os de transferência
+                // Mostra transf e marca padrão (Nome)
                 transfItems.forEach(id => {
                     const row = document.getElementById(`row-${id}`);
                     row.style.display = 'flex';
-                    // Reativa Transferência de Nome por padrão
                     if(id === 'transf_nome') row.querySelector('input').checked = true;
                 });
-
-                // 2. Desmarca a 2ª Via CRV (para evitar duplicidade)
+                // Desmarca 2ª via
                 crvCheckbox.checked = false;
             }
+            calculateLiveTotal(); // Recalcula
         }
 
         function toggleEditable(checkboxId, containerId) {
@@ -450,14 +475,47 @@
                 } else {
                     container.classList.remove('active');
                 }
+                calculateLiveTotal(); // Recalcula ao marcar/desmarcar
             }, 10);
+        }
+
+        // --- 4. TOTAL EM TEMPO REAL ---
+        function calculateLiveTotal() {
+            let total = 0;
+
+            // 1. Serviços Fixos
+            document.querySelectorAll('.std-service:checked').forEach(chk => {
+                const parentRow = chk.closest('.service-item');
+                if(parentRow.style.display !== 'none') {
+                    total += parseFloat(chk.value);
+                }
+            });
+
+            // 2. Serviços Variáveis (Função auxiliar)
+            function sumEditable(chkId, priceId) {
+                const chk = document.getElementById(chkId);
+                if(chk && chk.checked) {
+                    const valStr = document.getElementById(priceId).value.replace(',','.'); 
+                    total += parseFloat(valStr) || 0;
+                }
+            }
+
+            sumEditable('honorarios-chk', 'honorarios-price');
+            sumEditable('licensing-chk', 'licensing-price');
+            sumEditable('multas-chk', 'multas-price'); 
+            sumEditable('placa-moto-chk', 'placa-moto-price');
+            sumEditable('placa-carro-chk', 'placa-carro-price');
+            sumEditable('others-chk', 'others-price');
+            sumEditable('others2-chk', 'others2-price'); 
+
+            document.getElementById('live-total-value').innerText = formatMoney(total);
         }
 
         function formatMoney(value) {
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // --- 4. GERAÇÃO DO ORÇAMENTO ---
+        // --- 5. GERAÇÃO DO ORÇAMENTO ---
         function generateBudget() {
             const plate = document.getElementById('plate').value.toUpperCase();
             if(!plate) { alert("Por favor, digite a placa do veículo."); return; }
@@ -465,9 +523,8 @@
             const budgetItems = [];
             let total = 0;
 
-            // Coleta itens da lista padrão
+            // Coleta Fixos
             document.querySelectorAll('.std-service:checked').forEach(chk => {
-                // Verifica se o item está visível (para não cobrar itens ocultos de transf.)
                 const parentRow = chk.closest('.service-item');
                 if(parentRow.style.display !== 'none') {
                     const price = parseFloat(chk.value);
@@ -476,7 +533,7 @@
                 }
             });
 
-            // Função auxiliar para coletar itens editáveis
+            // Coleta Variáveis
             function collectEditable(chkId, descId, priceId) {
                 const chk = document.getElementById(chkId);
                 if(chk && chk.checked) {
@@ -488,7 +545,6 @@
                 }
             }
 
-            // Coleta Variáveis
             collectEditable('honorarios-chk', 'honorarios-desc', 'honorarios-price');
             collectEditable('licensing-chk', 'licensing-desc', 'licensing-price');
             collectEditable('multas-chk', 'multas-desc', 'multas-price'); 
@@ -499,7 +555,7 @@
 
             if(budgetItems.length === 0) { alert("Selecione ao menos um serviço."); return; }
 
-            // Preenche o HTML do Resultado
+            // Preenche Tabela
             const tbody = document.getElementById('budget-items');
             tbody.innerHTML = '';
             
@@ -516,7 +572,7 @@
             document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR');
             document.getElementById('display-total').innerText = formatMoney(total);
             
-            // Exibir tipo do serviço no cabeçalho
+            // Cabeçalho Visual
             const typeSelect = document.getElementById('budget-type');
             document.getElementById('display-type').innerText = typeSelect.options[typeSelect.selectedIndex].text.toUpperCase();
 
@@ -530,13 +586,20 @@
             document.getElementById('form-screen').style.display = 'block';
         }
 
-        // --- 5. EXPORTAÇÃO ---
+        // --- 6. EXPORTAÇÃO ---
         function copyToClipboard() {
             const plate = document.getElementById('display-plate').innerText;
             const rows = document.querySelectorAll('#budget-items tr');
             const total = document.getElementById('display-total').innerText;
+            const type = document.getElementById('budget-type').value;
             
-            let text = `*${plate}*\n`;
+            // Título Personalizado no WhatsApp
+            let text = "";
+            if (type === 'segunda_via') {
+                text = `*${plate}*\n*Segunda via de DUT:*\n`;
+            } else {
+                text = `*${plate}*\n`;
+            }
             
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td');
