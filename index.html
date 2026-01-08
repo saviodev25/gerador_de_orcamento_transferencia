@@ -9,8 +9,8 @@
 
     <style>
         :root {
-            --app-primary: #1f2937; /* Cinza escuro para a interface do app */
-            --gold: #D4AF37;       /* Dourado Metálico */
+            --app-primary: #1f2937;
+            --gold: #D4AF37;
             --black: #111111;
             --white: #ffffff;
             --bg: #f3f4f6;
@@ -42,13 +42,14 @@
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
         
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 1rem;
             box-sizing: border-box;
+            background-color: #fff;
         }
         
         #plate { text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
@@ -110,19 +111,17 @@
         .btn-outline { background: transparent; border: 2px solid var(--black); color: var(--black); }
         .btn-outline:hover { background: #eee; }
 
-        /* --- ESTILOS DO RESULTADO (DESIGN PREMIUM) --- */
+        /* --- ESTILOS DO RESULTADO --- */
         #result-screen { display: none; }
         
         .budget-paper {
             background: white;
             padding: 40px;
-            /* Simula uma folha de papel clean */
             border: 1px solid #e5e5e5;
             margin-bottom: 20px;
             position: relative;
         }
 
-        /* Detalhe Dourado no Topo */
         .budget-paper::before {
             content: '';
             position: absolute;
@@ -210,6 +209,14 @@
                 <input type="text" id="plate" placeholder="AAA-1234" maxlength="8">
             </div>
 
+            <div class="form-group">
+                <label>Finalidade do Orçamento</label>
+                <select id="budget-type" onchange="toggleServiceType()">
+                    <option value="transferencia">Transferência (Completa)</option>
+                    <option value="segunda_via">2ª Via de DUT (CRV)</option>
+                </select>
+            </div>
+
             <div class="section-title">Serviços Fixos</div>
             <div class="services-list" id="services-container">
                 </div>
@@ -225,6 +232,28 @@
                     <div class="editable-inputs">
                         <input type="text" id="honorarios-desc" value="Serviço (Honorários)">
                         <input type="number" id="honorarios-price" value="120.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="licensing-item">
+                    <div class="service-header" onclick="toggleEditable('licensing-chk', 'licensing-item')">
+                        <input type="checkbox" id="licensing-chk">
+                        <span class="service-name">Licenciamento</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="licensing-desc" value="Licenciamento 2026">
+                        <input type="number" id="licensing-price" value="181.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="multas-item">
+                    <div class="service-header" onclick="toggleEditable('multas-chk', 'multas-item')">
+                        <input type="checkbox" id="multas-chk">
+                        <span class="service-name" style="color:#d32f2f;">MULTAS</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="multas-desc" value="Multas / Débitos">
+                        <input type="number" id="multas-price" placeholder="Valor total multas" step="0.01">
                     </div>
                 </div>
 
@@ -250,25 +279,25 @@
                     </div>
                 </div>
 
-                <div class="service-item" id="licensing-item">
-                    <div class="service-header" onclick="toggleEditable('licensing-chk', 'licensing-item')">
-                        <input type="checkbox" id="licensing-chk">
-                        <span class="service-name">Licenciamento</span>
-                    </div>
-                    <div class="editable-inputs">
-                        <input type="text" id="licensing-desc" value="Licenciamento 2026">
-                        <input type="number" id="licensing-price" value="181.00" step="0.01">
-                    </div>
-                </div>
-
                 <div class="service-item" id="others-item">
                     <div class="service-header" onclick="toggleEditable('others-chk', 'others-item')">
                         <input type="checkbox" id="others-chk">
-                        <span class="service-name" style="color:#D4AF37; font-weight:bold;">OUTROS / EXTRA</span>
+                        <span class="service-name" style="color:var(--gold); font-weight:bold;">OUTROS 1</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="others-desc" placeholder="Descrição do serviço extra">
+                        <input type="text" id="others-desc" placeholder="Descrição do serviço">
                         <input type="number" id="others-price" placeholder="Valor" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="others2-item">
+                    <div class="service-header" onclick="toggleEditable('others2-chk', 'others2-item')">
+                        <input type="checkbox" id="others2-chk">
+                        <span class="service-name" style="color:var(--gold); font-weight:bold;">OUTROS 2</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="others2-desc" placeholder="Descrição extra">
+                        <input type="number" id="others2-price" placeholder="Valor" step="0.01">
                     </div>
                 </div>
 
@@ -285,6 +314,7 @@
                     <h2 class="budget-title">ORÇAMENTO</h2>
                     <p class="plate-display" id="display-plate">AAA-0000</p>
                     <p style="margin:0; font-size: 0.9rem; color: #555;">Data: <span id="display-date"></span></p>
+                    <p style="margin:5px 0 0 0; font-size: 0.8rem; font-weight:bold; color:var(--app-primary);" id="display-type"></p>
                 </div>
 
                 <table class="budget-table">
@@ -320,12 +350,11 @@
 
     <script>
         // --- 1. CONFIGURAÇÃO DOS SERVIÇOS FIXOS ---
-        // Removi os serviços que viraram editáveis (Serviço, Placas) desta lista
         const servicesData = [
             { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
             { id: 'transf_cidade', name: 'Transferência de Cidade', price: 167.00 },
             { id: 'transf_bahia', name: 'Transf. para Estado da Bahia', price: 328.00 },
-            { id: 'web', name: 'Web + Digitalização', price: 89.00 }, // Será marcado por padrão
+            { id: 'web', name: 'Web + Digitalização', price: 89.00 },
             { id: 'desalienacao', name: 'Desalienação', price: 91.00 },
             { id: 'alienacao', name: 'Alienação', price: 91.00 },
             { id: 'atpv', name: 'Atpv-e', price: 95.00 },
@@ -345,8 +374,9 @@
             servicesData.forEach(service => {
                 const div = document.createElement('div');
                 div.className = 'service-item';
+                div.id = `row-${service.id}`; // ID para manipular visibilidade
                 
-                // Lógica para marcar "Web" por padrão
+                // Marca Web por padrão
                 const isChecked = service.id === 'web' ? 'checked' : '';
                 
                 div.innerHTML = `
@@ -360,14 +390,32 @@
             });
         };
 
-        // --- 3. LÓGICA DE INTERFACE ---
+        // --- 3. LÓGICA DE TIPO DE SERVIÇO (Transferência vs 2ª Via) ---
+        function toggleServiceType() {
+            const type = document.getElementById('budget-type').value;
+            const itemsToHide = ['transf_nome', 'transf_cidade', 'transf_bahia'];
+
+            itemsToHide.forEach(id => {
+                const row = document.getElementById(`row-${id}`);
+                const checkbox = row.querySelector('input');
+                
+                if (type === 'segunda_via') {
+                    // Esconde e desmarca
+                    row.style.display = 'none';
+                    checkbox.checked = false;
+                } else {
+                    // Mostra
+                    row.style.display = 'flex';
+                }
+            });
+        }
+
         function toggleEditable(checkboxId, containerId) {
             const checkbox = document.getElementById(checkboxId);
             const container = document.getElementById(containerId);
             setTimeout(() => {
                 if (checkbox.checked) {
                     container.classList.add('active');
-                    // Tenta focar no input de preço para agilizar
                     const inputs = container.querySelectorAll('input[type="number"]');
                     if(inputs.length > 0) inputs[0].select(); 
                 } else {
@@ -390,17 +438,20 @@
 
             // Coleta itens da lista padrão
             document.querySelectorAll('.std-service:checked').forEach(chk => {
-                const price = parseFloat(chk.value);
-                budgetItems.push({ name: chk.getAttribute('data-name'), price: price });
-                total += price;
+                // Verifica se o item está visível (para não cobrar itens ocultos de transf.)
+                const parentRow = chk.closest('.service-item');
+                if(parentRow.style.display !== 'none') {
+                    const price = parseFloat(chk.value);
+                    budgetItems.push({ name: chk.getAttribute('data-name'), price: price });
+                    total += price;
+                }
             });
 
             // Função auxiliar para coletar itens editáveis
             function collectEditable(chkId, descId, priceId) {
                 const chk = document.getElementById(chkId);
-                if(chk.checked) {
+                if(chk && chk.checked) {
                     const name = document.getElementById(descId).value;
-                    // Corrige virgula para ponto caso o usuario digite manual
                     const valStr = document.getElementById(priceId).value.replace(',','.'); 
                     const price = parseFloat(valStr) || 0;
                     budgetItems.push({ name: name, price: price });
@@ -408,12 +459,14 @@
                 }
             }
 
-            // Coleta os editáveis
+            // Coleta Variáveis
             collectEditable('honorarios-chk', 'honorarios-desc', 'honorarios-price');
+            collectEditable('licensing-chk', 'licensing-desc', 'licensing-price');
+            collectEditable('multas-chk', 'multas-desc', 'multas-price'); // Novo
             collectEditable('placa-moto-chk', 'placa-moto-desc', 'placa-moto-price');
             collectEditable('placa-carro-chk', 'placa-carro-desc', 'placa-carro-price');
-            collectEditable('licensing-chk', 'licensing-desc', 'licensing-price');
             collectEditable('others-chk', 'others-desc', 'others-price');
+            collectEditable('others2-chk', 'others2-desc', 'others2-price'); // Novo
 
             if(budgetItems.length === 0) { alert("Selecione ao menos um serviço."); return; }
 
@@ -433,6 +486,10 @@
             document.getElementById('display-plate').innerText = plate;
             document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR');
             document.getElementById('display-total').innerText = formatMoney(total);
+            
+            // Exibir tipo do serviço no cabeçalho
+            const typeSelect = document.getElementById('budget-type');
+            document.getElementById('display-type').innerText = typeSelect.options[typeSelect.selectedIndex].text.toUpperCase();
 
             // Troca tela
             document.getElementById('form-screen').style.display = 'none';
@@ -450,24 +507,22 @@
             const rows = document.querySelectorAll('#budget-items tr');
             const total = document.getElementById('display-total').innerText;
             
-            let text = `*${plate}*\n\n`;
-            
+            let text = `${plate}*\n`;
+
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td');
-                // Adiciona espaço invisivel para alinhar melhor no zap se precisar
                 text += `${cols[0].innerText}: ${cols[1].innerText}\n`;
             });
-
-            text += `\n*TOTAL = ${total}*`;
+            
+            text += `*TOTAL = ${total}*`;
 
             navigator.clipboard.writeText(text).then(() => {
-                alert("Orçamento copiado! Pode colar no WhatsApp.");
+                alert("Orçamento copiado para WhatsApp!");
             });
         }
 
         function downloadImage() {
             const element = document.getElementById('capture-area');
-            // Aumentei a escala para 3 para ficar bem nitido (HD)
             html2canvas(element, { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Orcamento_${document.getElementById('plate').value}.png`;
