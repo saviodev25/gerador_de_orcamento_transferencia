@@ -26,7 +26,7 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center; /* Centraliza verticalmente o login */
+            align-items: center;
             min-height: 100vh;
         }
 
@@ -41,11 +41,9 @@
 
         h1 { margin-top: 0; font-size: 1.5rem; text-align: center; color: var(--app-primary); }
 
-        /* --- TELAS (LOGIN vs APP) --- */
-        #app-screen { display: none; } /* Escondido por padrão */
+        #app-screen { display: none; }
         #login-screen { display: block; }
 
-        /* --- ESTILOS DO FORMULÁRIO --- */
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
         
@@ -101,7 +99,6 @@
             font-weight: bold;
         }
 
-        /* --- TOTAL EM TEMPO REAL --- */
         .live-total {
             margin-top: 25px;
             padding: 15px;
@@ -137,6 +134,17 @@
         .btn:hover { opacity: 0.9; }
         .btn-outline { background: transparent; border: 2px solid var(--black); color: var(--black); }
         .btn-outline:hover { background: #eee; }
+        
+        .btn-reset {
+            background: transparent;
+            border: none;
+            color: #666;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
 
         .error-msg { color: var(--error); text-align: center; margin-top: 10px; display: none; font-weight: bold;}
 
@@ -157,6 +165,8 @@
             top: 0; left: 0; right: 0;
             height: 6px;
             background: var(--gold);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .budget-header {
@@ -174,6 +184,8 @@
             text-transform: uppercase;
             font-weight: 700;
             text-shadow: 0px 1px 1px rgba(0,0,0,0.1);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .plate-display {
@@ -194,6 +206,8 @@
             text-transform: uppercase;
             font-size: 0.9rem;
             letter-spacing: 1px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .budget-table td {
@@ -221,6 +235,8 @@
             font-weight: 800;
             margin-top: 20px;
             border-radius: 4px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         .attendant-signature {
@@ -234,6 +250,40 @@
 
         .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
         .full-width { grid-column: span 2; }
+
+        /* --- CONFIGURAÇÃO DE IMPRESSÃO --- */
+        @media print {
+            body { 
+                background-color: white; 
+                display: block; 
+                margin: 0; 
+                padding: 0;
+            }
+            .container { 
+                box-shadow: none; 
+                max-width: 100%; 
+                width: 100%; 
+                margin: 0; 
+                padding: 0; 
+                border-radius: 0; 
+            }
+            
+            /* Esconde botões e outras telas */
+            .actions, .btn, .btn-reset, #login-screen, #app-screen { 
+                display: none !important; 
+            }
+
+            /* Garante que o resultado apareça */
+            #result-screen { 
+                display: block !important; 
+            }
+            
+            .budget-paper { 
+                border: none; 
+                padding: 0; 
+                margin: 0; 
+            }
+        }
     </style>
 </head>
 <body>
@@ -242,11 +292,11 @@
         
         <div id="login-screen">
             <h1 style="color: var(--gold);">ACESSO RESTRITO</h1>
-            <p style="text-align:center; margin-bottom: 30px;">Entre com suas credenciais de colaborador pexe</p>
+            <p style="text-align:center; margin-bottom: 30px;">Entre com suas credenciais</p>
             
             <div class="form-group">
-                <label>Usuário (Iniciais)</label>
-                <input type="text" id="login-user" placeholder="Ex: LM" style="text-transform: uppercase;">
+                <label>Usuário</label>
+                <input type="text" id="login-user" placeholder="Ex: SS" style="text-transform: uppercase;">
             </div>
             
             <div class="form-group">
@@ -255,7 +305,7 @@
             </div>
 
             <button class="btn" onclick="performLogin()">ENTRAR</button>
-            <p class="error-msg" id="login-error">Usuário ou senha incorretos.</p>
+            <p class="error-msg" id="login-error">Credenciais inválidas.</p>
         </div>
 
         <div id="app-screen">
@@ -278,8 +328,7 @@
             </div>
 
             <div class="section-title">Serviços Fixos</div>
-            <div class="services-list" id="services-container">
-                </div>
+            <div class="services-list" id="services-container"></div>
 
             <div class="section-title">Serviços Variáveis</div>
             <div class="services-list">
@@ -301,7 +350,7 @@
                         <span class="service-name">Licenciamento</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="licensing-desc" value="Licenciamento e IPVA 2026 (IPVA 2026 com 15% de desconto até 10/02)">
+                        <input type="text" id="licensing-desc" value="LICENCIAMENTO E IPVA 2026 (IPVA 2026 COM DESCONTO DE 15% ATÉ 10/02)">
                         <input type="number" id="licensing-price" value="181.00" step="0.01">
                     </div>
                 </div>
@@ -360,7 +409,6 @@
                         <input type="number" id="others2-price" placeholder="Valor" step="0.01">
                     </div>
                 </div>
-
             </div>
 
             <div class="live-total">
@@ -369,6 +417,7 @@
             </div>
 
             <button class="btn" onclick="generateBudget()">GERAR ORÇAMENTO</button>
+            <button class="btn-reset" onclick="resetForm()">Limpar Campos</button>
         </div>
 
         <div id="result-screen">
@@ -376,7 +425,8 @@
             
             <div id="capture-area" class="budget-paper">
                 <div class="budget-header">
-                    <h2 class="budget-title">ORÇAMENTO</h2>
+                    <h2 class="budget-title" id="final-title">ORÇAMENTO</h2>
+                    
                     <p class="plate-display" id="display-plate">AAA-0000</p>
                     <p style="margin:0; font-size: 0.9rem; color: #555;">Data: <span id="display-date"></span></p>
                     <p style="margin:5px 0 0 0; font-size: 0.8rem; font-weight:bold; color:var(--app-primary);" id="display-type"></p>
@@ -389,8 +439,7 @@
                             <th>Valor</th>
                         </tr>
                     </thead>
-                    <tbody id="budget-items">
-                        </tbody>
+                    <tbody id="budget-items"></tbody>
                 </table>
 
                 <div class="total-row">
@@ -408,8 +457,15 @@
                     WhatsApp (Texto)
                 </button>
                 <button class="btn" onclick="downloadImage()">
-                    Baixar Imagem
+                    Baixar Imagem (PNG)
                 </button>
+                 <button class="btn" style="background-color: #4b5563; border-color:#4b5563; color:white;" onclick="window.print()">
+                    🖨️ Imprimir
+                </button>
+                <button class="btn" style="background-color: var(--app-primary); color: var(--gold); border-color: var(--app-primary);" onclick="startNewBudget()">
+                    ✨ Novo Orçamento
+                </button>
+                
                 <button class="btn btn-outline full-width" onclick="editBudget()">
                     Voltar / Editar
                 </button>
@@ -418,18 +474,17 @@
     </div>
 
     <script>
-        // --- 0. SISTEMA DE LOGIN ---
-        // Adicione aqui os usuários da sua equipe
+        // --- LOGIN ---
         const team = [
-            { user: 'SS', pass: 'pexe', name: 'S S' },
-            { user: 'LM', pass: 'pexe', name: 'L M' }, 
-            { user: 'TS', pass: 'pexe', name: 'T S' }, 
-            { user: 'NG', pass: 'pexe', name: 'N G' },
-            { user: 'LC', pass: 'pexe', name: 'L C' },
-            { user: 'AF', pass: 'pexe', name: 'A F' },
-            { user: 'IA', pass: 'pexe', name: 'I A' },
+            { user: 'SS', pass: 'pexe', name: 'S.S' },
+            { user: 'LM', pass: 'pexe', name: 'L.M' }, 
+            { user: 'TS', pass: 'pexe', name: 'T.S' }, 
+            { user: 'NG', pass: 'pexe', name: 'N.G' },
+            { user: 'LC', pass: 'pexe', name: 'L.C' },
+            { user: 'AF', pass: 'pexe', name: 'A.F' },
+            { user: 'IA', pass: 'pexe', name: 'I.A' },
             { user: 'A', pass: 'pexe', name: 'Augusto' },
-            { user: 'IJ', pass: 'pexe', name: 'I J' },
+            { user: 'IJ', pass: 'pexe', name: 'I.J' },
         ];
 
         let currentAttendant = '';
@@ -437,29 +492,21 @@
         function performLogin() {
             const userIn = document.getElementById('login-user').value.toUpperCase().trim();
             const passIn = document.getElementById('login-pass').value.trim();
-            const errorMsg = document.getElementById('login-error');
-
             const foundUser = team.find(u => u.user === userIn && u.pass === passIn);
 
             if (foundUser) {
-                // Login Sucesso
                 currentAttendant = foundUser.name;
                 document.getElementById('attendant-badge').innerText = `👤 ${foundUser.name}`;
                 document.getElementById('display-attendant').innerText = foundUser.name;
-                
-                // Troca Tela
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
-                
-                // Remove erro se houver
-                errorMsg.style.display = 'none';
+                document.getElementById('login-error').style.display = 'none';
             } else {
-                // Login Erro
-                errorMsg.style.display = 'block';
+                document.getElementById('login-error').style.display = 'block';
             }
         }
 
-        // --- 1. CONFIGURAÇÃO DOS SERVIÇOS FIXOS ---
+        // --- DADOS ---
         const servicesData = [
             { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
             { id: 'transf_cidade', name: 'Transferência de Cidade', price: 167.00 },
@@ -477,7 +524,7 @@
             { id: 'subst_motor', name: 'Substituição de Motor', price: 324.00 }
         ];
 
-        // --- 2. INICIALIZAÇÃO ---
+        // --- INICIALIZAÇÃO ---
         window.onload = function() {
             const container = document.getElementById('services-container');
             const defaultChecked = ['transf_nome', 'web', 'vistoria'];
@@ -486,7 +533,6 @@
                 const div = document.createElement('div');
                 div.className = 'service-item';
                 div.id = `row-${service.id}`; 
-                
                 const isChecked = defaultChecked.includes(service.id) ? 'checked' : '';
                 
                 div.innerHTML = `
@@ -501,22 +547,26 @@
 
             ['honorarios-chk'].forEach(id => {
                 const chk = document.getElementById(id);
-                if(chk && chk.checked) {
-                    const container = chk.closest('.service-item');
-                    container.classList.add('active');
-                }
+                if(chk && chk.checked) chk.closest('.service-item').classList.add('active');
+            });
+
+            const plateInput = document.getElementById('plate');
+            plateInput.addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (value.length > 7) value = value.slice(0, 7);
+                if (value.length > 3) value = value.slice(0, 3) + '-' + value.slice(3);
+                e.target.value = value;
             });
 
             document.getElementById('app-screen').addEventListener('input', calculateLiveTotal);
             calculateLiveTotal();
         };
 
-        // --- 3. LÓGICA DE SERVIÇOS ---
+        // --- LÓGICA ---
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
             const transfItems = ['transf_nome', 'transf_cidade', 'transf_bahia'];
             const crvRow = document.getElementById('row-segunda_crv');
-            const crvCheckbox = crvRow.querySelector('input');
 
             if (type === 'segunda_via') {
                 transfItems.forEach(id => {
@@ -524,14 +574,14 @@
                     row.style.display = 'none';
                     row.querySelector('input').checked = false;
                 });
-                crvCheckbox.checked = true;
+                crvRow.querySelector('input').checked = true;
             } else {
                 transfItems.forEach(id => {
                     const row = document.getElementById(`row-${id}`);
                     row.style.display = 'flex';
                     if(id === 'transf_nome') row.querySelector('input').checked = true;
                 });
-                crvCheckbox.checked = false;
+                crvRow.querySelector('input').checked = false;
             }
             calculateLiveTotal();
         }
@@ -558,21 +608,14 @@
                 if(parentRow.style.display !== 'none') total += parseFloat(chk.value);
             });
 
-            function sumEditable(chkId, priceId) {
-                const chk = document.getElementById(chkId);
+            const editables = ['honorarios', 'licensing', 'multas', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            editables.forEach(key => {
+                const chk = document.getElementById(`${key}-chk`);
                 if(chk && chk.checked) {
-                    const valStr = document.getElementById(priceId).value.replace(',','.'); 
-                    total += parseFloat(valStr) || 0;
+                    const priceIn = document.getElementById(`${key}-price`);
+                    total += parseFloat(priceIn.value.replace(',','.')) || 0;
                 }
-            }
-
-            sumEditable('honorarios-chk', 'honorarios-price');
-            sumEditable('licensing-chk', 'licensing-price');
-            sumEditable('multas-chk', 'multas-price'); 
-            sumEditable('placa-moto-chk', 'placa-moto-price');
-            sumEditable('placa-carro-chk', 'placa-carro-price');
-            sumEditable('others-chk', 'others-price');
-            sumEditable('others2-chk', 'others2-price'); 
+            });
 
             document.getElementById('live-total-value').innerText = formatMoney(total);
         }
@@ -581,10 +624,43 @@
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // --- 4. GERAÇÃO DE ORÇAMENTO ---
+        // Função auxiliar para limpar campos (usada por resetForm e startNewBudget)
+        function clearFields() {
+            document.getElementById('plate').value = '';
+            document.getElementById('budget-type').value = 'transferencia';
+            document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+            
+            const defaultChecked = ['transf_nome', 'web', 'vistoria'];
+            defaultChecked.forEach(id => document.querySelector(`#row-${id} input`).checked = true);
+            
+            document.getElementById('honorarios-chk').checked = true;
+            document.querySelectorAll('.service-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('honorarios-item').classList.add('active');
+            
+            document.getElementById('multas-price').value = '';
+            document.getElementById('multas-desc').value = '';
+            document.getElementById('others-price').value = '';
+            document.getElementById('others-desc').value = '';
+
+            toggleServiceType();
+        }
+
+        function resetForm() {
+            if(!confirm("Deseja limpar todos os campos?")) return;
+            clearFields();
+        }
+
+        // NOVA FUNÇÃO: NOVO ORÇAMENTO
+        function startNewBudget() {
+            if(confirm("Iniciar um NOVO orçamento?")) {
+                clearFields();
+                editBudget(); // Volta para a tela de form
+            }
+        }
+
         function generateBudget() {
             const plate = document.getElementById('plate').value.toUpperCase();
-            if(!plate) { alert("Por favor, digite a placa do veículo."); return; }
+            if(!plate) { alert("Digite a placa!"); return; }
 
             const budgetItems = [];
             let total = 0;
@@ -598,30 +674,21 @@
                 }
             });
 
-            function collectEditable(chkId, descId, priceId) {
-                const chk = document.getElementById(chkId);
+            const editables = ['honorarios', 'licensing', 'multas', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            editables.forEach(key => {
+                const chk = document.getElementById(`${key}-chk`);
                 if(chk && chk.checked) {
-                    const name = document.getElementById(descId).value;
-                    const valStr = document.getElementById(priceId).value.replace(',','.'); 
-                    const price = parseFloat(valStr) || 0;
+                    const name = document.getElementById(`${key}-desc`).value;
+                    const price = parseFloat(document.getElementById(`${key}-price`).value.replace(',','.')) || 0;
                     budgetItems.push({ name: name, price: price });
                     total += price;
                 }
-            }
+            });
 
-            collectEditable('honorarios-chk', 'honorarios-desc', 'honorarios-price');
-            collectEditable('licensing-chk', 'licensing-desc', 'licensing-price');
-            collectEditable('multas-chk', 'multas-desc', 'multas-price'); 
-            collectEditable('placa-moto-chk', 'placa-moto-desc', 'placa-moto-price');
-            collectEditable('placa-carro-chk', 'placa-carro-desc', 'placa-carro-price');
-            collectEditable('others-chk', 'others-desc', 'others-price');
-            collectEditable('others2-chk', 'others2-desc', 'others2-price'); 
-
-            if(budgetItems.length === 0) { alert("Selecione ao menos um serviço."); return; }
+            if(budgetItems.length === 0) { alert("Selecione algo!"); return; }
 
             const tbody = document.getElementById('budget-items');
             tbody.innerHTML = '';
-            
             budgetItems.forEach(item => {
                 tbody.innerHTML += `<tr><td>${item.name}</td><td>${formatMoney(item.price)}</td></tr>`;
             });
@@ -630,8 +697,16 @@
             document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR');
             document.getElementById('display-total').innerText = formatMoney(total);
             
-            const typeSelect = document.getElementById('budget-type');
-            document.getElementById('display-type').innerText = typeSelect.options[typeSelect.selectedIndex].text.toUpperCase();
+            const type = document.getElementById('budget-type').value;
+            const titleEl = document.getElementById('final-title');
+            const subTitleEl = document.getElementById('display-type');
+
+            if(type === 'segunda_via') {
+                titleEl.innerText = "ORÇAMENTO - 2ª VIA DE DUT";
+            } else {
+                titleEl.innerText = "ORÇAMENTO";
+                subTitleEl.innerText = "TRANSFERÊNCIA (COMPLETA)";
+            }
 
             document.getElementById('app-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'block';
@@ -642,7 +717,6 @@
             document.getElementById('app-screen').style.display = 'block';
         }
 
-        // --- 5. EXPORTAÇÃO ---
         function copyToClipboard() {
             const plate = document.getElementById('display-plate').innerText;
             const rows = document.querySelectorAll('#budget-items tr');
@@ -651,7 +725,7 @@
             
             let text = "";
             if (type === 'segunda_via') {
-                text = `*${plate}*\n*Segunda via de DUT:*\n\n`;
+                text = `*${plate}*\n*Segunda via de DUT:*\n`;
             } else {
                 text = `*${plate}*\n`;
             }
@@ -662,8 +736,9 @@
             });
 
             text += `*TOTAL = ${total}*`;
+
             navigator.clipboard.writeText(text).then(() => {
-                alert("Orçamento copiado para WhatsApp!");
+                alert("Copiado!");
             });
         }
 
