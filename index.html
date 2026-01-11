@@ -296,7 +296,7 @@
             
             <div class="form-group">
                 <label>Usuário</label>
-                <input type="text" id="login-user" placeholder="Ex: SS" style="text-transform: uppercase;">
+                <input type="text" id="login-user" placeholder="Ex: LM" style="text-transform: uppercase;">
             </div>
             
             <div class="form-group">
@@ -476,7 +476,7 @@
     <script>
         // --- LOGIN ---
         const team = [
-            { user: 'SS', pass: 'pexe', name: 'S.S' },
+            { user: 'SS', pass: 'sssal', name: 'S.S' },
             { user: 'LM', pass: 'pexe', name: 'L.M' }, 
             { user: 'TS', pass: 'pexe', name: 'T.S' }, 
             { user: 'NG', pass: 'pexe', name: 'N.G' },
@@ -526,6 +526,14 @@
 
         // --- INICIALIZAÇÃO ---
         window.onload = function() {
+            // ADICIONADO: Habilita login com Enter
+            document.getElementById('login-user').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') performLogin();
+            });
+            document.getElementById('login-pass').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') performLogin();
+            });
+
             const container = document.getElementById('services-container');
             const defaultChecked = ['transf_nome', 'web', 'vistoria'];
 
