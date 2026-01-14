@@ -366,6 +366,17 @@
                     </div>
                 </div>
 
+                <div class="service-item" id="alt-carac-item">
+                    <div class="service-header" onclick="toggleEditable('alt-carac-chk', 'alt-carac-item')">
+                        <input type="checkbox" id="alt-carac-chk">
+                        <span class="service-name">Alteração de Característica</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="alt-carac-desc" placeholder="Ex: Alteração de Cor">
+                        <input type="number" id="alt-carac-price" value="149.00" step="0.01">
+                    </div>
+                </div>
+
                 <div class="service-item" id="placa-moto-item">
                     <div class="service-header" onclick="toggleEditable('placa-moto-chk', 'placa-moto-item')">
                         <input type="checkbox" id="placa-moto-chk">
@@ -517,7 +528,7 @@
             { id: 'atpv', name: 'Atpv-e', price: 95.00 },
             { id: 'vistoria', name: 'Vistoria', price: 350.00 },
             { id: 'mudanca_cat', name: 'Mudança de Categoria', price: 324.00 },
-            { id: 'alt_carac', name: 'Alteração de Característica', price: 149.00 },
+            // alt_carac foi REMOVIDO daqui pois agora é variável
             { id: 'segunda_crv', name: '2ª via CRV', price: 106.00 },
             { id: 'regrav_vin', name: 'Regravação de Vin (Chassi)', price: 175.00 },
             { id: 'grav_motor', name: 'Gravação, Regravação de Motor', price: 175.00 },
@@ -526,7 +537,7 @@
 
         // --- INICIALIZAÇÃO ---
         window.onload = function() {
-            // ADICIONADO: Habilita login com Enter
+            // Habilita login com Enter
             document.getElementById('login-user').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') performLogin();
             });
@@ -616,7 +627,7 @@
                 if(parentRow.style.display !== 'none') total += parseFloat(chk.value);
             });
 
-            const editables = ['honorarios', 'licensing', 'multas', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            const editables = ['honorarios', 'licensing', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
             editables.forEach(key => {
                 const chk = document.getElementById(`${key}-chk`);
                 if(chk && chk.checked) {
@@ -632,7 +643,7 @@
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // Função auxiliar para limpar campos (usada por resetForm e startNewBudget)
+        // Função auxiliar para limpar campos
         function clearFields() {
             document.getElementById('plate').value = '';
             document.getElementById('budget-type').value = 'transferencia';
@@ -647,6 +658,10 @@
             
             document.getElementById('multas-price').value = '';
             document.getElementById('multas-desc').value = '';
+            // Reseta Alteração de Característica
+            document.getElementById('alt-carac-price').value = '149.00';
+            document.getElementById('alt-carac-desc').value = '';
+            
             document.getElementById('others-price').value = '';
             document.getElementById('others-desc').value = '';
 
@@ -658,11 +673,10 @@
             clearFields();
         }
 
-        // NOVA FUNÇÃO: NOVO ORÇAMENTO
         function startNewBudget() {
             if(confirm("Iniciar um NOVO orçamento?")) {
                 clearFields();
-                editBudget(); // Volta para a tela de form
+                editBudget();
             }
         }
 
@@ -682,7 +696,8 @@
                 }
             });
 
-            const editables = ['honorarios', 'licensing', 'multas', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            // Adicionado 'alt-carac' na lista de coleta
+            const editables = ['honorarios', 'licensing', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
             editables.forEach(key => {
                 const chk = document.getElementById(`${key}-chk`);
                 if(chk && chk.checked) {
