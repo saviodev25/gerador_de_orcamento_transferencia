@@ -324,6 +324,10 @@
                 <select id="budget-type" onchange="toggleServiceType()">
                     <option value="transferencia">Transferência (Completa)</option>
                     <option value="segunda_via">2ª Via de DUT (CRV)</option>
+                    <option value="subst_motor">Substituição de Motor</option>
+                    <option value="grav_motor">Gravação/Regravação de Motor</option>
+                    <option value="regrav_vin">Regravação de Vin (Chassi)</option>
+                    <option value="mudanca_cat">Mudança de Categoria</option>
                 </select>
             </div>
 
@@ -355,6 +359,17 @@
                     </div>
                 </div>
 
+                <div class="service-item" id="atpv-item">
+                    <div class="service-header" onclick="toggleEditable('atpv-chk', 'atpv-item')">
+                        <input type="checkbox" id="atpv-chk">
+                        <span class="service-name">ATPV-e</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="atpv-desc" value="ATPV-e">
+                        <input type="number" id="atpv-price" value="95.00" step="0.01">
+                    </div>
+                </div>
+
                 <div class="service-item" id="multas-item">
                     <div class="service-header" onclick="toggleEditable('multas-chk', 'multas-item')">
                         <input type="checkbox" id="multas-chk">
@@ -372,7 +387,7 @@
                         <span class="service-name">Alteração de Característica</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="alt-carac-desc" placeholder="Ex: Alteração de Cor">
+                        <input type="text" id="alt-carac-desc" placeholder="Especifique (Ex: Cor, Blindagem)">
                         <input type="number" id="alt-carac-price" value="149.00" step="0.01">
                     </div>
                 </div>
@@ -525,10 +540,8 @@
             { id: 'web', name: 'Web + Digitalização', price: 89.00 },
             { id: 'desalienacao', name: 'Desalienação', price: 91.00 },
             { id: 'alienacao', name: 'Alienação', price: 91.00 },
-            { id: 'atpv', name: 'Atpv-e', price: 95.00 },
             { id: 'vistoria', name: 'Vistoria', price: 350.00 },
             { id: 'mudanca_cat', name: 'Mudança de Categoria', price: 324.00 },
-            // alt_carac foi REMOVIDO daqui pois agora é variável
             { id: 'segunda_crv', name: '2ª via CRV', price: 106.00 },
             { id: 'regrav_vin', name: 'Regravação de Vin (Chassi)', price: 175.00 },
             { id: 'grav_motor', name: 'Gravação, Regravação de Motor', price: 175.00 },
@@ -581,27 +594,70 @@
             calculateLiveTotal();
         };
 
-        // --- LÓGICA ---
+        // --- LÓGICA DE SERVIÇO INTELIGENTE (ATUALIZADA) ---
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
-            const transfItems = ['transf_nome', 'transf_cidade', 'transf_bahia'];
-            const crvRow = document.getElementById('row-segunda_crv');
-
-            if (type === 'segunda_via') {
-                transfItems.forEach(id => {
+            const transferRows = ['transf_nome', 'transf_cidade', 'transf_bahia'];
+            
+            // 1. Visibilidade: Se for Transferência, mostra. Se for outro, esconde.
+            if (type === 'transferencia') {
+                transferRows.forEach(id => {
                     const row = document.getElementById(`row-${id}`);
-                    row.style.display = 'none';
-                    row.querySelector('input').checked = false;
+                    if(row) {
+                        row.style.display = 'flex';
+                        row.querySelector('input').checked = false; // reseta antes de marcar o default
+                    }
                 });
-                crvRow.querySelector('input').checked = true;
             } else {
-                transfItems.forEach(id => {
+                transferRows.forEach(id => {
                     const row = document.getElementById(`row-${id}`);
-                    row.style.display = 'flex';
-                    if(id === 'transf_nome') row.querySelector('input').checked = true;
+                    if(row) {
+                        row.style.display = 'none';
+                        row.querySelector('input').checked = false; // garante que não soma oculto
+                    }
                 });
-                crvRow.querySelector('input').checked = false;
             }
+
+            // 2. Reseta checkboxes principais da lista fixa
+            document.querySelectorAll('.std-service').forEach(chk => chk.checked = false);
+
+            const setCheck = (id) => {
+                const row = document.getElementById(`row-${id}`);
+                if(row) row.querySelector('input').checked = true;
+            };
+
+            // 3. Aplica a lógica baseada na escolha
+            if (type === 'transferencia') {
+                setCheck('transf_nome');
+                setCheck('web');
+                setCheck('vistoria');
+            } 
+            else if (type === 'segunda_via') {
+                setCheck('segunda_crv');
+                setCheck('web');
+                setCheck('vistoria');
+            }
+            else if (type === 'subst_motor') {
+                setCheck('subst_motor');
+                setCheck('web');
+                setCheck('vistoria');
+            }
+            else if (type === 'grav_motor') {
+                setCheck('grav_motor');
+                setCheck('web');
+                setCheck('vistoria');
+            }
+            else if (type === 'regrav_vin') {
+                setCheck('regrav_vin');
+                setCheck('web');
+                setCheck('vistoria');
+            }
+            else if (type === 'mudanca_cat') {
+                setCheck('mudanca_cat');
+                setCheck('web');
+                setCheck('vistoria');
+            }
+
             calculateLiveTotal();
         }
 
@@ -623,11 +679,13 @@
         function calculateLiveTotal() {
             let total = 0;
             document.querySelectorAll('.std-service:checked').forEach(chk => {
-                const parentRow = chk.closest('.service-item');
-                if(parentRow.style.display !== 'none') total += parseFloat(chk.value);
+                // SÓ SOMA SE ESTIVER VISÍVEL
+                if (chk.closest('.service-item').style.display !== 'none') {
+                    total += parseFloat(chk.value);
+                }
             });
 
-            const editables = ['honorarios', 'licensing', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            const editables = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
             editables.forEach(key => {
                 const chk = document.getElementById(`${key}-chk`);
                 if(chk && chk.checked) {
@@ -643,25 +701,29 @@
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // Função auxiliar para limpar campos
         function clearFields() {
             document.getElementById('plate').value = '';
             document.getElementById('budget-type').value = 'transferencia';
-            document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             
-            const defaultChecked = ['transf_nome', 'web', 'vistoria'];
-            defaultChecked.forEach(id => document.querySelector(`#row-${id} input`).checked = true);
+            document.querySelectorAll('.std-service').forEach(c => c.checked = false);
             
+            const editables = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            editables.forEach(key => {
+                const chk = document.getElementById(`${key}-chk`);
+                if(chk) chk.checked = false;
+                const container = document.getElementById(`${key}-item`);
+                if(container) container.classList.remove('active');
+            });
+
             document.getElementById('honorarios-chk').checked = true;
-            document.querySelectorAll('.service-item').forEach(item => item.classList.remove('active'));
             document.getElementById('honorarios-item').classList.add('active');
             
             document.getElementById('multas-price').value = '';
             document.getElementById('multas-desc').value = '';
-            // Reseta Alteração de Característica
+            document.getElementById('atpv-price').value = '95.00';
+            document.getElementById('atpv-desc').value = 'ATPV-e';
             document.getElementById('alt-carac-price').value = '149.00';
             document.getElementById('alt-carac-desc').value = '';
-            
             document.getElementById('others-price').value = '';
             document.getElementById('others-desc').value = '';
 
@@ -676,7 +738,7 @@
         function startNewBudget() {
             if(confirm("Iniciar um NOVO orçamento?")) {
                 clearFields();
-                editBudget();
+                editBudget(); 
             }
         }
 
@@ -688,16 +750,15 @@
             let total = 0;
 
             document.querySelectorAll('.std-service:checked').forEach(chk => {
-                const parentRow = chk.closest('.service-item');
-                if(parentRow.style.display !== 'none') {
+                // SÓ GERA SE ESTIVER VISÍVEL
+                if (chk.closest('.service-item').style.display !== 'none') {
                     const price = parseFloat(chk.value);
                     budgetItems.push({ name: chk.getAttribute('data-name'), price: price });
                     total += price;
                 }
             });
 
-            // Adicionado 'alt-carac' na lista de coleta
-            const editables = ['honorarios', 'licensing', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            const editables = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
             editables.forEach(key => {
                 const chk = document.getElementById(`${key}-chk`);
                 if(chk && chk.checked) {
@@ -720,15 +781,16 @@
             document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR');
             document.getElementById('display-total').innerText = formatMoney(total);
             
-            const type = document.getElementById('budget-type').value;
+            const typeText = document.getElementById('budget-type').options[document.getElementById('budget-type').selectedIndex].text;
             const titleEl = document.getElementById('final-title');
             const subTitleEl = document.getElementById('display-type');
 
-            if(type === 'segunda_via') {
-                titleEl.innerText = "ORÇAMENTO - 2ª VIA DE DUT";
-            } else {
+            if (document.getElementById('budget-type').value === 'transferencia') {
                 titleEl.innerText = "ORÇAMENTO";
                 subTitleEl.innerText = "TRANSFERÊNCIA (COMPLETA)";
+            } else {
+                titleEl.innerText = "ORÇAMENTO";
+                subTitleEl.innerText = typeText.toUpperCase();
             }
 
             document.getElementById('app-screen').style.display = 'none';
@@ -744,14 +806,9 @@
             const plate = document.getElementById('display-plate').innerText;
             const rows = document.querySelectorAll('#budget-items tr');
             const total = document.getElementById('display-total').innerText;
-            const type = document.getElementById('budget-type').value;
+            const typeText = document.getElementById('display-type').innerText;
             
-            let text = "";
-            if (type === 'segunda_via') {
-                text = `*${plate}*\n*Segunda via de DUT:*\n`;
-            } else {
-                text = `*${plate}*\n`;
-            }
+            let text = `*${plate}*\n*${typeText}*\n`;
             
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td');
