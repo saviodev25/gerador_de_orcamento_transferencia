@@ -4,16 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Orçamento Prime LM</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root {
-            --app-primary: #1f2937;
-            --gold: #D4AF37;
+            /* Paleta de Cores do Sistema */
+            --app-primary: #1f2937; /* Cinza Escuro */
+            --gold: #D4AF37;       /* Dourado da Marca */
             --black: #111111;
             --white: #ffffff;
-            --bg: #f3f4f6;
+            --bg: #f3f4f6;         /* Fundo cinza claro */
             --border: #e5e7eb;
             --error: #ef4444;
         }
@@ -28,6 +31,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            flex-direction: column;
         }
 
         .container {
@@ -37,13 +41,17 @@
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         h1 { margin-top: 0; font-size: 1.5rem; text-align: center; color: var(--app-primary); }
 
-        #app-screen { display: none; }
-        #login-screen { display: block; }
+        /* CONTROLE DE TELAS */
+        #app-screen { display: none; } /* Começa escondido */
+        #login-screen { display: block; } /* Começa visível */
+        #result-screen { display: none; }
 
+        /* FORMULÁRIOS */
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
         
@@ -59,7 +67,9 @@
         }
         
         #plate { text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
+        #custom-title { border-color: var(--gold); background-color: #fffbf0; }
 
+        /* LISTA DE SERVIÇOS */
         .services-list { display: grid; gap: 10px; margin-top: 15px; }
 
         .service-item {
@@ -77,6 +87,7 @@
         .service-name { flex-grow: 1; }
         .price-tag { font-weight: bold; color: var(--app-primary); }
 
+        /* CAMPOS EDITÁVEIS (Escondidos por padrão) */
         .editable-inputs {
             display: none;
             margin-top: 10px;
@@ -99,6 +110,7 @@
             font-weight: bold;
         }
 
+        /* TOTAL FLUTUANTE */
         .live-total {
             margin-top: 25px;
             padding: 15px;
@@ -118,6 +130,7 @@
             color: var(--black);
         }
 
+        /* BOTÕES */
         .btn {
             width: 100%;
             padding: 14px;
@@ -148,9 +161,34 @@
 
         .error-msg { color: var(--error); text-align: center; margin-top: 10px; display: none; font-weight: bold;}
 
-        /* --- ESTILOS DO RESULTADO --- */
-        #result-screen { display: none; }
-        
+        /* ÁREA DE HISTÓRICO */
+        #history-section {
+            margin-top: 30px;
+            border-top: 2px dashed #ddd;
+            padding-top: 20px;
+            display: none; /* Só aparece se tiver itens */
+        }
+        .history-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-left: 4px solid var(--gold);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .history-card:hover { transform: translateX(5px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .history-info strong { display: block; font-size: 1rem; }
+        .history-info span { font-size: 0.8rem; color: #666; }
+        .history-actions button {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;
+        }
+
+        /* --- ESTILOS DA FOLHA DE ORÇAMENTO (O que vira imagem) --- */
         .budget-paper {
             background: white;
             padding: 40px;
@@ -165,124 +203,34 @@
             top: 0; left: 0; right: 0;
             height: 6px;
             background: var(--gold);
+            /* Garante que a cor saia na impressão */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
-        .budget-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--black);
-        }
-
-        .budget-title {
-            margin: 0;
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-            color: var(--gold);
-            text-transform: uppercase;
-            font-weight: 700;
-            text-shadow: 0px 1px 1px rgba(0,0,0,0.1);
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        .plate-display {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--black);
-            margin: 10px 0;
-            letter-spacing: 2px;
-        }
+        .budget-header { text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid var(--black); }
+        .budget-title { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; font-weight: 700; text-shadow: 0px 1px 1px rgba(0,0,0,0.1); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .plate-display { font-size: 2rem; font-weight: 800; color: var(--black); margin: 10px 0; letter-spacing: 2px; }
 
         .budget-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        
-        .budget-table th {
-            text-align: left;
-            padding: 12px;
-            background-color: var(--black);
-            color: var(--gold);
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+        .budget-table th { text-align: left; padding: 12px; background-color: var(--black); color: var(--gold); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .budget-table td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-weight: 500; }
+        .budget-table td:last-child { text-align: right; font-weight: 700; color: var(--black); white-space: nowrap; }
 
-        .budget-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .budget-table td:last-child {
-            text-align: right;
-            font-weight: 700;
-            color: var(--black);
-            white-space: nowrap;
-        }
-
-        .total-row {
-            background-color: var(--gold);
-            color: var(--black);
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin-top: 20px;
-            border-radius: 4px;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        .attendant-signature {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: #666;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
+        .total-row { background-color: var(--gold); color: var(--black); padding: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.4rem; font-weight: 800; margin-top: 20px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .attendant-signature { margin-top: 30px; text-align: center; font-size: 0.85rem; color: #666; border-top: 1px solid #eee; padding-top: 10px; }
 
         .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
         .full-width { grid-column: span 2; }
 
-        /* --- CONFIGURAÇÃO DE IMPRESSÃO --- */
+        /* --- CONFIGURAÇÃO PARA IMPRESSÃO (CTRL+P) --- */
         @media print {
-            body { 
-                background-color: white; 
-                display: block; 
-                margin: 0; 
-                padding: 0;
-            }
-            .container { 
-                box-shadow: none; 
-                max-width: 100%; 
-                width: 100%; 
-                margin: 0; 
-                padding: 0; 
-                border-radius: 0; 
-            }
-            
-            /* Esconde botões e outras telas */
-            .actions, .btn, .btn-reset, #login-screen, #app-screen { 
-                display: none !important; 
-            }
-
-            /* Garante que o resultado apareça */
-            #result-screen { 
-                display: block !important; 
-            }
-            
-            .budget-paper { 
-                border: none; 
-                padding: 0; 
-                margin: 0; 
-            }
+            body { background-color: white; display: block; margin: 0; padding: 0; }
+            .container { box-shadow: none; max-width: 100%; width: 100%; margin: 0; padding: 0; border-radius: 0; }
+            /* Esconde tudo que não for o orçamento */
+            .actions, .btn, .btn-reset, #login-screen, #app-screen, #history-section { display: none !important; }
+            #result-screen { display: block !important; }
+            .budget-paper { border: none; padding: 0; margin: 0; }
         }
     </style>
 </head>
@@ -329,6 +277,11 @@
                     <option value="regrav_vin">Regravação de Vin (Chassi)</option>
                     <option value="mudanca_cat">Mudança de Categoria</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label style="color:var(--gold);">Título Personalizado (Opcional)</label>
+                <input type="text" id="custom-title" placeholder="Ex: Desalienação (Deixe vazio p/ usar padrão)">
             </div>
 
             <div class="section-title">Serviços Fixos</div>
@@ -444,6 +397,12 @@
 
             <button class="btn" onclick="generateBudget()">GERAR ORÇAMENTO</button>
             <button class="btn-reset" onclick="resetForm()">Limpar Campos</button>
+
+            <div id="history-section">
+                <h3 style="color:#666; font-size:1rem; border-bottom:1px solid #ddd; padding-bottom:5px;">Histórico Recente</h3>
+                <div id="history-list">
+                    </div>
+            </div>
         </div>
 
         <div id="result-screen">
@@ -485,9 +444,11 @@
                 <button class="btn" onclick="downloadImage()">
                     Baixar Imagem (PNG)
                 </button>
-                 <button class="btn" style="background-color: #4b5563; border-color:#4b5563; color:white;" onclick="window.print()">
-                    🖨️ Imprimir
+                
+                <button class="btn" style="background-color: #4b5563; border-color:#4b5563; color:white;" onclick="saveToHistory()">
+                    💾 Salvar para Depois
                 </button>
+                
                 <button class="btn" style="background-color: var(--app-primary); color: var(--gold); border-color: var(--app-primary);" onclick="startNewBudget()">
                     ✨ Novo Orçamento
                 </button>
@@ -500,7 +461,9 @@
     </div>
 
     <script>
-        // --- LOGIN ---
+        // ------------------------------------
+        // 1. CONFIGURAÇÃO DE USUÁRIOS (EQUIPE)
+        // ------------------------------------
         const team = [
             { user: 'SS', pass: 'sssal', name: 'S.S' },
             { user: 'LM', pass: 'pexe', name: 'L.M' }, 
@@ -515,24 +478,10 @@
 
         let currentAttendant = '';
 
-        function performLogin() {
-            const userIn = document.getElementById('login-user').value.toUpperCase().trim();
-            const passIn = document.getElementById('login-pass').value.trim();
-            const foundUser = team.find(u => u.user === userIn && u.pass === passIn);
-
-            if (foundUser) {
-                currentAttendant = foundUser.name;
-                document.getElementById('attendant-badge').innerText = `👤 ${foundUser.name}`;
-                document.getElementById('display-attendant').innerText = foundUser.name;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-screen').style.display = 'block';
-                document.getElementById('login-error').style.display = 'none';
-            } else {
-                document.getElementById('login-error').style.display = 'block';
-            }
-        }
-
-        // --- DADOS ---
+        // ------------------------------------
+        // 2. CONFIGURAÇÃO DOS SERVIÇOS FIXOS
+        // ------------------------------------
+        // Obs: ATPV-e e Alteração de Característica foram movidos para Variáveis
         const servicesData = [
             { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
             { id: 'transf_cidade', name: 'Transferência de Cidade', price: 167.00 },
@@ -548,288 +497,351 @@
             { id: 'subst_motor', name: 'Substituição de Motor', price: 324.00 }
         ];
 
-        // --- INICIALIZAÇÃO ---
+        // ------------------------------------
+        // 3. INICIALIZAÇÃO DO SISTEMA
+        // ------------------------------------
         window.onload = function() {
-            // Habilita login com Enter
-            document.getElementById('login-user').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') performLogin();
-            });
-            document.getElementById('login-pass').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') performLogin();
-            });
-
+            // Configura tecla ENTER para login
+            document.getElementById('login-user').addEventListener('keypress', e => { if(e.key==='Enter') performLogin() });
+            document.getElementById('login-pass').addEventListener('keypress', e => { if(e.key==='Enter') performLogin() });
+            
+            // Gera a lista de serviços fixos no HTML
             const container = document.getElementById('services-container');
             const defaultChecked = ['transf_nome', 'web', 'vistoria'];
 
-            servicesData.forEach(service => {
-                const div = document.createElement('div');
-                div.className = 'service-item';
-                div.id = `row-${service.id}`; 
-                const isChecked = defaultChecked.includes(service.id) ? 'checked' : '';
+            servicesData.forEach(s => {
+                const div = document.createElement('div'); 
+                div.className = 'service-item'; 
+                div.id = `row-${s.id}`; 
+                
+                const chk = defaultChecked.includes(s.id) ? 'checked' : '';
                 
                 div.innerHTML = `
                     <div class="service-header" onclick="this.querySelector('input').click()">
-                        <input type="checkbox" value="${service.price}" data-name="${service.name}" class="std-service" ${isChecked}>
-                        <span class="service-name">${service.name}</span>
-                        <span class="price-tag">${formatMoney(service.price)}</span>
+                        <input type="checkbox" value="${s.price}" data-name="${s.name}" class="std-service" ${chk}>
+                        <span class="service-name">${s.name}</span>
+                        <span class="price-tag">${formatMoney(s.price)}</span>
                     </div>
                 `;
                 container.appendChild(div);
             });
 
-            ['honorarios-chk'].forEach(id => {
-                const chk = document.getElementById(id);
-                if(chk && chk.checked) chk.closest('.service-item').classList.add('active');
+            // Ativa visualmente o item de Honorários (padrão)
+            ['honorarios-chk'].forEach(id => { 
+                const c = document.getElementById(id); 
+                if(c && c.checked) c.closest('.service-item').classList.add('active'); 
             });
 
-            const plateInput = document.getElementById('plate');
-            plateInput.addEventListener('input', function(e) {
-                let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                if (value.length > 7) value = value.slice(0, 7);
-                if (value.length > 3) value = value.slice(0, 3) + '-' + value.slice(3);
-                e.target.value = value;
+            // Máscara de Placa (AAA-1234)
+            document.getElementById('plate').addEventListener('input', e => { 
+                let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); 
+                if(v.length > 7) v = v.slice(0, 7); 
+                if(v.length > 3) v = v.slice(0, 3) + '-' + v.slice(3); 
+                e.target.value = v; 
             });
 
+            // Monitora mudanças para atualizar total em tempo real
             document.getElementById('app-screen').addEventListener('input', calculateLiveTotal);
             calculateLiveTotal();
         };
 
-        // --- LÓGICA DE SERVIÇO INTELIGENTE (ATUALIZADA) ---
+        // ------------------------------------
+        // 4. FUNÇÕES DE AUTENTICAÇÃO
+        // ------------------------------------
+        function performLogin() {
+            const u = document.getElementById('login-user').value.toUpperCase().trim();
+            const p = document.getElementById('login-pass').value.trim();
+            const f = team.find(x => x.user === u && x.pass === p);
+            
+            if(f){ 
+                currentAttendant = f.name; 
+                document.getElementById('attendant-badge').innerText = `👤 ${f.name}`; 
+                document.getElementById('display-attendant').innerText = f.name; 
+                
+                // Troca Tela
+                document.getElementById('login-screen').style.display = 'none'; 
+                document.getElementById('app-screen').style.display = 'block'; 
+                
+                // Carrega histórico se houver
+                renderHistory(); 
+            } else { 
+                document.getElementById('login-error').style.display = 'block'; 
+            }
+        }
+
+        // ------------------------------------
+        // 5. LÓGICA DE NEGÓCIO E UI
+        // ------------------------------------
+        
+        /**
+         * Controla a visibilidade dos campos com base no tipo de orçamento.
+         * Se não for Transferência Completa, esconde os campos de transf.
+         */
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
             const transferRows = ['transf_nome', 'transf_cidade', 'transf_bahia'];
             
-            // 1. Visibilidade: Se for Transferência, mostra. Se for outro, esconde.
-            if (type === 'transferencia') {
-                transferRows.forEach(id => {
-                    const row = document.getElementById(`row-${id}`);
-                    if(row) {
-                        row.style.display = 'flex';
-                        row.querySelector('input').checked = false; // reseta antes de marcar o default
-                    }
-                });
-            } else {
-                transferRows.forEach(id => {
-                    const row = document.getElementById(`row-${id}`);
-                    if(row) {
-                        row.style.display = 'none';
-                        row.querySelector('input').checked = false; // garante que não soma oculto
-                    }
-                });
+            // 1. Lógica de Visibilidade (Mostrar/Esconder)
+            if (type === 'transferencia') { 
+                transferRows.forEach(id => { 
+                    const r = document.getElementById(`row-${id}`); 
+                    if(r) { r.style.display = 'flex'; r.querySelector('input').checked = false; } 
+                }); 
+            } else { 
+                transferRows.forEach(id => { 
+                    const r = document.getElementById(`row-${id}`); 
+                    if(r) { r.style.display = 'none'; r.querySelector('input').checked = false; } 
+                }); 
             }
-
-            // 2. Reseta checkboxes principais da lista fixa
+            
+            // 2. Reseta seleções
             document.querySelectorAll('.std-service').forEach(chk => chk.checked = false);
-
-            const setCheck = (id) => {
-                const row = document.getElementById(`row-${id}`);
-                if(row) row.querySelector('input').checked = true;
-            };
-
-            // 3. Aplica a lógica baseada na escolha
-            if (type === 'transferencia') {
-                setCheck('transf_nome');
-                setCheck('web');
-                setCheck('vistoria');
-            } 
-            else if (type === 'segunda_via') {
-                setCheck('segunda_crv');
-                setCheck('web');
-                setCheck('vistoria');
-            }
-            else if (type === 'subst_motor') {
-                setCheck('subst_motor');
-                setCheck('web');
-                setCheck('vistoria');
-            }
-            else if (type === 'grav_motor') {
-                setCheck('grav_motor');
-                setCheck('web');
-                setCheck('vistoria');
-            }
-            else if (type === 'regrav_vin') {
-                setCheck('regrav_vin');
-                setCheck('web');
-                setCheck('vistoria');
-            }
-            else if (type === 'mudanca_cat') {
-                setCheck('mudanca_cat');
-                setCheck('web');
-                setCheck('vistoria');
-            }
-
+            
+            const setCheck = (id) => { const r = document.getElementById(`row-${id}`); if(r) r.querySelector('input').checked = true; };
+            
+            // 3. Marca os itens padrão de acordo com o tipo
+            if (type === 'transferencia') { setCheck('transf_nome'); setCheck('web'); setCheck('vistoria'); } 
+            else if (type === 'segunda_via') { setCheck('segunda_crv'); setCheck('web'); setCheck('vistoria'); }
+            else if (type === 'subst_motor') { setCheck('subst_motor'); setCheck('web'); setCheck('vistoria'); }
+            else if (type === 'grav_motor') { setCheck('grav_motor'); setCheck('web'); setCheck('vistoria'); }
+            else if (type === 'regrav_vin') { setCheck('regrav_vin'); setCheck('web'); setCheck('vistoria'); }
+            else if (type === 'mudanca_cat') { setCheck('mudanca_cat'); setCheck('web'); setCheck('vistoria'); }
+            
             calculateLiveTotal();
         }
 
-        function toggleEditable(checkboxId, containerId) {
-            const checkbox = document.getElementById(checkboxId);
-            const container = document.getElementById(containerId);
-            setTimeout(() => {
-                if (checkbox.checked) {
-                    container.classList.add('active');
-                    const inputs = container.querySelectorAll('input[type="number"]');
-                    if(inputs.length > 0) inputs[0].select(); 
-                } else {
-                    container.classList.remove('active');
-                }
-                calculateLiveTotal();
-            }, 10);
+        /**
+         * Abre/Fecha os campos editáveis (accordion)
+         */
+        function toggleEditable(id, cid) { 
+            const c = document.getElementById(id); 
+            const ct = document.getElementById(cid); 
+            setTimeout(() => { 
+                if(c.checked) { 
+                    ct.classList.add('active'); 
+                    const i = ct.querySelectorAll('input[type="number"]'); 
+                    if(i.length) i[0].select(); 
+                } else { 
+                    ct.classList.remove('active'); 
+                } 
+                calculateLiveTotal(); 
+            }, 10); 
         }
 
-        function calculateLiveTotal() {
-            let total = 0;
-            document.querySelectorAll('.std-service:checked').forEach(chk => {
-                // SÓ SOMA SE ESTIVER VISÍVEL
-                if (chk.closest('.service-item').style.display !== 'none') {
-                    total += parseFloat(chk.value);
-                }
+        /**
+         * Soma tudo que está checado na tela
+         */
+        function calculateLiveTotal() { 
+            let t = 0; 
+            // Soma fixos (apenas visíveis)
+            document.querySelectorAll('.std-service:checked').forEach(c => { 
+                if(c.closest('.service-item').style.display !== 'none') t += parseFloat(c.value); 
             });
-
-            const editables = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
-            editables.forEach(key => {
-                const chk = document.getElementById(`${key}-chk`);
-                if(chk && chk.checked) {
-                    const priceIn = document.getElementById(`${key}-price`);
-                    total += parseFloat(priceIn.value.replace(',','.')) || 0;
-                }
+            
+            // Soma variáveis
+            const keys = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            keys.forEach(k => { 
+                const c = document.getElementById(k+'-chk'); 
+                if(c && c.checked) t += parseFloat(document.getElementById(k+'-price').value.replace(',','.')) || 0; 
             });
-
-            document.getElementById('live-total-value').innerText = formatMoney(total);
+            
+            document.getElementById('live-total-value').innerText = formatMoney(t);
         }
 
-        function formatMoney(value) {
-            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+        function formatMoney(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
+        // ------------------------------------
+        // 6. GESTÃO DE FORMULÁRIO (LIMPEZA)
+        // ------------------------------------
         function clearFields() {
-            document.getElementById('plate').value = '';
-            document.getElementById('budget-type').value = 'transferencia';
+            document.getElementById('plate').value = ''; 
+            document.getElementById('budget-type').value = 'transferencia'; 
+            document.getElementById('custom-title').value = '';
             
             document.querySelectorAll('.std-service').forEach(c => c.checked = false);
             
-            const editables = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
-            editables.forEach(key => {
-                const chk = document.getElementById(`${key}-chk`);
-                if(chk) chk.checked = false;
-                const container = document.getElementById(`${key}-item`);
-                if(container) container.classList.remove('active');
+            const keys = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            keys.forEach(k => { 
+                const c = document.getElementById(k+'-chk'); 
+                if(c) c.checked = false; 
+                const ct = document.getElementById(k+'-item'); 
+                if(ct) ct.classList.remove('active'); 
             });
-
-            document.getElementById('honorarios-chk').checked = true;
+            
+            // Restaura padrão
+            document.getElementById('honorarios-chk').checked = true; 
             document.getElementById('honorarios-item').classList.add('active');
             
-            document.getElementById('multas-price').value = '';
-            document.getElementById('multas-desc').value = '';
-            document.getElementById('atpv-price').value = '95.00';
-            document.getElementById('atpv-desc').value = 'ATPV-e';
-            document.getElementById('alt-carac-price').value = '149.00';
-            document.getElementById('alt-carac-desc').value = '';
-            document.getElementById('others-price').value = '';
-            document.getElementById('others-desc').value = '';
-
+            // Resets manuais de valor
+            document.getElementById('multas-price').value = ''; document.getElementById('multas-desc').value = '';
+            document.getElementById('atpv-price').value = '95.00'; document.getElementById('atpv-desc').value = 'ATPV-e';
+            document.getElementById('alt-carac-price').value = '149.00'; document.getElementById('alt-carac-desc').value = '';
+            document.getElementById('others-price').value = ''; document.getElementById('others-desc').value = '';
+            
             toggleServiceType();
         }
 
-        function resetForm() {
-            if(!confirm("Deseja limpar todos os campos?")) return;
-            clearFields();
-        }
+        function resetForm() { if(confirm("Deseja limpar todos os campos?")) clearFields(); }
+        function startNewBudget() { if(confirm("Iniciar um NOVO orçamento?")) { clearFields(); editBudget(); } }
 
-        function startNewBudget() {
-            if(confirm("Iniciar um NOVO orçamento?")) {
-                clearFields();
-                editBudget(); 
-            }
-        }
-
+        // ------------------------------------
+        // 7. GERAÇÃO DO ORÇAMENTO (TABELA)
+        // ------------------------------------
         function generateBudget() {
-            const plate = document.getElementById('plate').value.toUpperCase();
-            if(!plate) { alert("Digite a placa!"); return; }
-
-            const budgetItems = [];
-            let total = 0;
-
-            document.querySelectorAll('.std-service:checked').forEach(chk => {
-                // SÓ GERA SE ESTIVER VISÍVEL
-                if (chk.closest('.service-item').style.display !== 'none') {
-                    const price = parseFloat(chk.value);
-                    budgetItems.push({ name: chk.getAttribute('data-name'), price: price });
-                    total += price;
-                }
-            });
-
-            const editables = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
-            editables.forEach(key => {
-                const chk = document.getElementById(`${key}-chk`);
-                if(chk && chk.checked) {
-                    const name = document.getElementById(`${key}-desc`).value;
-                    const price = parseFloat(document.getElementById(`${key}-price`).value.replace(',','.')) || 0;
-                    budgetItems.push({ name: name, price: price });
-                    total += price;
-                }
-            });
-
-            if(budgetItems.length === 0) { alert("Selecione algo!"); return; }
-
-            const tbody = document.getElementById('budget-items');
-            tbody.innerHTML = '';
-            budgetItems.forEach(item => {
-                tbody.innerHTML += `<tr><td>${item.name}</td><td>${formatMoney(item.price)}</td></tr>`;
-            });
-
-            document.getElementById('display-plate').innerText = plate;
-            document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR');
-            document.getElementById('display-total').innerText = formatMoney(total);
+            const p = document.getElementById('plate').value.toUpperCase(); 
+            if(!p) { alert("Digite a placa!"); return; }
             
-            const typeText = document.getElementById('budget-type').options[document.getElementById('budget-type').selectedIndex].text;
-            const titleEl = document.getElementById('final-title');
+            const items = []; 
+            let t = 0;
+
+            // Coleta Fixos
+            document.querySelectorAll('.std-service:checked').forEach(c => { 
+                if(c.closest('.service-item').style.display !== 'none') { 
+                    const v = parseFloat(c.value); 
+                    items.push({n: c.getAttribute('data-name'), v}); 
+                    t += v; 
+                } 
+            });
+
+            // Coleta Variáveis
+            const keys = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            keys.forEach(k => { 
+                const c = document.getElementById(k+'-chk'); 
+                if(c && c.checked) { 
+                    const n = document.getElementById(k+'-desc').value; 
+                    const v = parseFloat(document.getElementById(k+'-price').value.replace(',','.')) || 0; 
+                    items.push({n, v}); 
+                    t += v; 
+                } 
+            });
+
+            if(!items.length) { alert("Selecione algo!"); return; }
+
+            // Renderiza HTML da Tabela
+            const tb = document.getElementById('budget-items'); tb.innerHTML = '';
+            items.forEach(i => tb.innerHTML += `<tr><td>${i.n}</td><td>${formatMoney(i.v)}</td></tr>`);
+            
+            // Preenche dados finais
+            document.getElementById('display-plate').innerText = p; 
+            document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR'); 
+            document.getElementById('display-total').innerText = formatMoney(t);
+            
+            // Lógica do Título Personalizado
+            const custT = document.getElementById('custom-title').value.toUpperCase();
+            const typeSel = document.getElementById('budget-type');
+            const typeText = typeSel.options[typeSel.selectedIndex].text;
             const subTitleEl = document.getElementById('display-type');
+            
+            document.getElementById('final-title').innerText = "ORÇAMENTO";
+            
+            if(custT && custT.trim() !== "") subTitleEl.innerText = custT;
+            else subTitleEl.innerText = (typeSel.value === 'transferencia') ? "TRANSFERÊNCIA (COMPLETA)" : typeText.toUpperCase();
 
-            if (document.getElementById('budget-type').value === 'transferencia') {
-                titleEl.innerText = "ORÇAMENTO";
-                subTitleEl.innerText = "TRANSFERÊNCIA (COMPLETA)";
-            } else {
-                titleEl.innerText = "ORÇAMENTO";
-                subTitleEl.innerText = typeText.toUpperCase();
-            }
+            // Mostra tela de resultado
+            document.getElementById('app-screen').style.display = 'none'; 
+            document.getElementById('result-screen').style.display = 'block';
+        }
 
+        function editBudget() { 
+            document.getElementById('result-screen').style.display = 'none'; 
+            document.getElementById('app-screen').style.display = 'block'; 
+        }
+
+        // ------------------------------------
+        // 8. EXPORTAÇÃO E HISTÓRICO
+        // ------------------------------------
+        
+        function copyToClipboard() {
+            const p = document.getElementById('display-plate').innerText; 
+            const t = document.getElementById('display-total').innerText; 
+            const st = document.getElementById('display-type').innerText;
+            
+            let txt = `*${p}*\n*${st}*\n`;
+            document.querySelectorAll('#budget-items tr').forEach(r => txt += `- ${r.cells[0].innerText}: ${r.cells[1].innerText}\n`);
+            txt += `*TOTAL = ${t}*`;
+            
+            navigator.clipboard.writeText(txt).then(() => alert("Copiado!"));
+        }
+
+        function downloadImage() { 
+            html2canvas(document.getElementById('capture-area'), { scale: 3, backgroundColor: "#ffffff" }).then(c => { 
+                const l = document.createElement('a'); 
+                l.download = `Orcamento_${document.getElementById('plate').value}.png`; 
+                l.href = c.toDataURL(); 
+                l.click(); 
+            }); 
+        }
+
+        // Salva orçamento atual no LocalStorage
+        function saveToHistory() {
+            const plate = document.getElementById('display-plate').innerText;
+            const total = document.getElementById('display-total').innerText;
+            const type = document.getElementById('display-type').innerText;
+            const attendant = currentAttendant;
+            
+            const budgetData = {
+                plate, total, type, attendant,
+                html: document.getElementById('budget-items').innerHTML,
+                timestamp: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+            };
+
+            let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
+            history.unshift(budgetData); 
+            if(history.length > 5) history.pop(); // Limite de 5 itens
+            localStorage.setItem('budgetHistory', JSON.stringify(history));
+            
+            alert("Salvo!");
+            renderHistory();
+            editBudget(); 
+        }
+
+        // Renderiza a lista de histórico na tela inicial
+        function renderHistory() {
+            const historyList = document.getElementById('history-list');
+            const historySection = document.getElementById('history-section');
+            let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
+            
+            if(history.length === 0) { historySection.style.display = 'none'; return; }
+            historySection.style.display = 'block';
+            historyList.innerHTML = '';
+
+            history.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-card';
+                div.innerHTML = `
+                    <div class="history-info" onclick="restoreBudget(${index})">
+                        <strong>${item.plate} - ${item.total}</strong>
+                        <span>${item.type} • ${item.timestamp} • Por: ${item.attendant}</span>
+                    </div>
+                    <div class="history-actions">
+                        <button onclick="deleteHistory(${index})" style="color:red;">&times;</button>
+                    </div>
+                `;
+                historyList.appendChild(div);
+            });
+        }
+
+        // Recupera um orçamento do histórico para a tela de resultado
+        function restoreBudget(index) {
+            let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
+            const item = history[index];
+            if(!item) return;
+
+            document.getElementById('display-plate').innerText = item.plate;
+            document.getElementById('display-total').innerText = item.total;
+            document.getElementById('display-type').innerText = item.type;
+            document.getElementById('display-attendant').innerText = item.attendant;
+            document.getElementById('budget-items').innerHTML = item.html;
+            
             document.getElementById('app-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'block';
         }
 
-        function editBudget() {
-            document.getElementById('result-screen').style.display = 'none';
-            document.getElementById('app-screen').style.display = 'block';
-        }
-
-        function copyToClipboard() {
-            const plate = document.getElementById('display-plate').innerText;
-            const rows = document.querySelectorAll('#budget-items tr');
-            const total = document.getElementById('display-total').innerText;
-            const typeText = document.getElementById('display-type').innerText;
-            
-            let text = `*${plate}*\n*${typeText}*\n`;
-            
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('td');
-                text += `${cols[0].innerText}: ${cols[1].innerText}\n`;
-            });
-
-            text += `*TOTAL = ${total}*`;
-
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Copiado!");
-            });
-        }
-
-        function downloadImage() {
-            const element = document.getElementById('capture-area');
-            html2canvas(element, { scale: 3, backgroundColor: "#ffffff" }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Orcamento_${document.getElementById('plate').value}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-            });
+        function deleteHistory(index) {
+            let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
+            history.splice(index, 1);
+            localStorage.setItem('budgetHistory', JSON.stringify(history));
+            renderHistory();
         }
     </script>
 </body>
