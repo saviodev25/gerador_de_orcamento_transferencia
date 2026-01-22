@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Orçamento Prime LM</title>
+    <title>Gerador de Orçamento Prime LM - Versão Final</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -11,12 +11,11 @@
 
     <style>
         :root {
-            /* Paleta de Cores do Sistema */
-            --app-primary: #1f2937; /* Cinza Escuro */
+            --app-primary: #1f2937; /* Cor Principal (Cinza Escuro) */
             --gold: #D4AF37;       /* Dourado da Marca */
             --black: #111111;
             --white: #ffffff;
-            --bg: #f3f4f6;         /* Fundo cinza claro */
+            --bg: #f3f4f6;
             --border: #e5e7eb;
             --error: #ef4444;
         }
@@ -47,12 +46,12 @@
 
         h1 { margin-top: 0; font-size: 1.5rem; text-align: center; color: var(--app-primary); }
 
-        /* CONTROLE DE TELAS */
-        #app-screen { display: none; } /* Começa escondido */
-        #login-screen { display: block; } /* Começa visível */
+        /* --- CONTROLE DE TELAS --- */
+        #app-screen { display: none; }
+        #login-screen { display: block; }
         #result-screen { display: none; }
 
-        /* FORMULÁRIOS */
+        /* --- FORMULÁRIOS --- */
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
         
@@ -70,7 +69,7 @@
         #plate { text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         #custom-title { border-color: var(--gold); background-color: #fffbf0; }
 
-        /* LISTA DE SERVIÇOS */
+        /* --- LISTA DE SERVIÇOS (CSS GRID) --- */
         .services-list { display: grid; gap: 10px; margin-top: 15px; }
 
         .service-item {
@@ -83,12 +82,13 @@
             transition: all 0.2s;
         }
         
+        /* Cabeçalho do item (Checkbox + Nome + Preço) */
         .service-header { display: flex; align-items: center; width: 100%; cursor: pointer; }
         .service-header input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); accent-color: var(--gold); }
         .service-name { flex-grow: 1; }
         .price-tag { font-weight: bold; color: var(--app-primary); }
 
-        /* CAMPOS EDITÁVEIS (Escondidos por padrão) */
+        /* Área Editável (Escondida por padrão) */
         .editable-inputs {
             display: none;
             margin-top: 10px;
@@ -98,20 +98,23 @@
             border-top: 1px dashed #ddd;
         }
         
+        /* Quando item está ativo (marcado) */
         .service-item.active { background-color: #fffbf0; border-color: var(--gold); }
         .service-item.active .editable-inputs { display: grid; }
 
         .section-title {
-            margin-top: 20px;
+            margin-top: 25px;
             margin-bottom: 5px;
             font-size: 0.9rem;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: bold;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
 
-        /* TOTAL FLUTUANTE */
+        /* --- TOTAL FLUTUANTE --- */
         .live-total {
             margin-top: 25px;
             padding: 15px;
@@ -124,14 +127,9 @@
             color: var(--app-primary);
             border: 1px solid #d1d5db;
         }
-        
-        .live-total span:last-child {
-            font-weight: 800;
-            font-size: 1.3rem;
-            color: var(--black);
-        }
+        .live-total span:last-child { font-weight: 800; font-size: 1.3rem; color: var(--black); }
 
-        /* BOTÕES */
+        /* --- BOTÕES --- */
         .btn {
             width: 100%;
             padding: 14px;
@@ -162,12 +160,12 @@
 
         .error-msg { color: var(--error); text-align: center; margin-top: 10px; display: none; font-weight: bold;}
 
-        /* ÁREA DE HISTÓRICO */
+        /* --- HISTÓRICO LOCAL --- */
         #history-section {
             margin-top: 30px;
             border-top: 2px dashed #ddd;
             padding-top: 20px;
-            display: none; /* Só aparece se tiver itens */
+            display: none; 
         }
         .history-card {
             background: #fff;
@@ -185,11 +183,9 @@
         .history-card:hover { transform: translateX(5px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .history-info strong { display: block; font-size: 1rem; }
         .history-info span { font-size: 0.8rem; color: #666; }
-        .history-actions button {
-            background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;
-        }
+        .history-actions button { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; }
 
-        /* --- ESTILOS DA FOLHA DE ORÇAMENTO (O que vira imagem) --- */
+        /* --- FOLHA DE ORÇAMENTO (RESULTADO) --- */
         .budget-paper {
             background: white;
             padding: 40px;
@@ -197,18 +193,11 @@
             margin-bottom: 20px;
             position: relative;
         }
-
         .budget-paper::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 6px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
             background: var(--gold);
-            /* Garante que a cor saia na impressão */
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-
         .budget-header { text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid var(--black); }
         .budget-title { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; font-weight: 700; text-shadow: 0px 1px 1px rgba(0,0,0,0.1); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .plate-display { font-size: 2rem; font-weight: 800; color: var(--black); margin: 10px 0; letter-spacing: 2px; }
@@ -224,16 +213,14 @@
         .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
         .full-width { grid-column: span 2; }
 
-        /* --- CONFIGURAÇÃO PARA IMPRESSÃO (CTRL+P) --- */
+        /* --- CONFIGURAÇÃO DE IMPRESSÃO --- */
         @media print {
             body { background-color: white; display: block; margin: 0; padding: 0; }
             .container { box-shadow: none; max-width: 100%; width: 100%; margin: 0; padding: 0; border-radius: 0; }
-            /* Esconde tudo que não for o orçamento */
             .actions, .btn, .btn-reset, #login-screen, #app-screen, #history-section { display: none !important; }
             #result-screen { display: block !important; }
             .budget-paper { border: none; padding: 0; margin: 0; }
         }
-
     </style>
 </head>
 <body>
@@ -289,6 +276,31 @@
             <div class="section-title">Serviços Fixos</div>
             <div class="services-list" id="services-container"></div>
 
+            <div class="services-list" style="margin-top: 10px;">
+                
+                <div class="service-item" id="alt-carac-item">
+                    <div class="service-header" onclick="toggleEditable('alt-carac-chk', 'alt-carac-item')">
+                        <input type="checkbox" id="alt-carac-chk">
+                        <span class="service-name">Alteração de Característica</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="alt-carac-desc" placeholder="Especifique (Ex: Cor, Blindagem)">
+                        <input type="number" id="alt-carac-price" value="149.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="mudanca-cat-item">
+                    <div class="service-header" onclick="toggleEditable('mudanca-cat-chk', 'mudanca-cat-item')">
+                        <input type="checkbox" id="mudanca-cat-chk">
+                        <span class="service-name">Mudança de Categoria</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="mudanca-cat-desc" placeholder="Ex: De Aluguel p/ Particular">
+                        <input type="number" id="mudanca-cat-price" value="324.00" step="0.01">
+                    </div>
+                </div>
+            </div>
+
             <div class="section-title">Serviços Variáveis</div>
             <div class="services-list">
                 
@@ -300,6 +312,17 @@
                     <div class="editable-inputs">
                         <input type="text" id="honorarios-desc" value="Serviço (Honorários)">
                         <input type="number" id="honorarios-price" value="120.00" step="0.01">
+                    </div>
+                </div>
+
+                <div class="service-item" id="licensing-ant-item">
+                    <div class="service-header" onclick="toggleEditable('licensing-ant-chk', 'licensing-ant-item')">
+                        <input type="checkbox" id="licensing-ant-chk">
+                        <span class="service-name">Licenciamento Anterior</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="licensing-ant-desc" value="Licenciamento e IPVA 2025">
+                        <input type="number" id="licensing-ant-price" placeholder="Valor" step="0.01">
                     </div>
                 </div>
 
@@ -333,17 +356,6 @@
                     <div class="editable-inputs">
                         <input type="text" id="multas-desc" placeholder="Descrição da Multa" value="">
                         <input type="number" id="multas-price" placeholder="Valor total multas" step="0.01">
-                    </div>
-                </div>
-
-                <div class="service-item" id="alt-carac-item">
-                    <div class="service-header" onclick="toggleEditable('alt-carac-chk', 'alt-carac-item')">
-                        <input type="checkbox" id="alt-carac-chk">
-                        <span class="service-name">Alteração de Característica</span>
-                    </div>
-                    <div class="editable-inputs">
-                        <input type="text" id="alt-carac-desc" placeholder="Especifique (Ex: Cor, Blindagem)">
-                        <input type="number" id="alt-carac-price" value="149.00" step="0.01">
                     </div>
                 </div>
 
@@ -464,12 +476,12 @@
 
     <script>
         // ------------------------------------
-        // 1. CONFIGURAÇÃO DE USUÁRIOS (EQUIPE)
+        // 1. CONFIGURAÇÃO DE USUÁRIOS
         // ------------------------------------
         const team = [
             { user: 'SS', pass: 'sssal', name: 'S.S' },
             { user: 'LM', pass: 'pexe', name: 'L.M' }, 
-            { user: 'TS', pass: 'pexe', name: 'T.S' }, 
+            { user: 'TS', pass: 'pexe', name: 'T.S' },
             { user: 'NG', pass: 'pexe', name: 'N.G' },
             { user: 'LC', pass: 'pexe', name: 'L.C' },
             { user: 'AF', pass: 'pexe', name: 'A.F' },
@@ -481,9 +493,33 @@
         let currentAttendant = '';
 
         // ------------------------------------
-        // 2. CONFIGURAÇÃO DOS SERVIÇOS FIXOS
+        // 2. FUNÇÕES DE LOGIN (Com Tecla Enter)
         // ------------------------------------
-        // Obs: ATPV-e e Alteração de Característica foram movidos para Variáveis
+        function performLogin() {
+            const u = document.getElementById('login-user').value.toUpperCase().trim();
+            const p = document.getElementById('login-pass').value.trim();
+            const f = team.find(x => x.user === u && x.pass === p);
+            
+            if(f){ 
+                currentAttendant = f.name; 
+                document.getElementById('attendant-badge').innerText = `👤 ${f.name}`; 
+                document.getElementById('display-attendant').innerText = f.name; 
+                
+                document.getElementById('login-screen').style.display = 'none'; 
+                document.getElementById('app-screen').style.display = 'block'; 
+                document.getElementById('login-error').style.display = 'none'; 
+                
+                renderHistory(); // Carrega histórico salvo
+            } else { 
+                document.getElementById('login-error').style.display = 'block'; 
+            }
+        }
+
+        // ------------------------------------
+        // 3. DADOS DE SERVIÇOS (Lista Automática)
+        // ------------------------------------
+        // Obs: "Alteração de Característica" e "Mudança de Categoria" foram removidos daqui
+        // pois agora são itens editáveis manuais (não simples checkboxes fixos).
         const servicesData = [
             { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
             { id: 'transf_cidade', name: 'Transferência de Cidade', price: 167.00 },
@@ -492,7 +528,6 @@
             { id: 'desalienacao', name: 'Desalienação', price: 91.00 },
             { id: 'alienacao', name: 'Alienação', price: 91.00 },
             { id: 'vistoria', name: 'Vistoria', price: 350.00 },
-            { id: 'mudanca_cat', name: 'Mudança de Categoria', price: 324.00 },
             { id: 'segunda_crv', name: '2ª via CRV', price: 106.00 },
             { id: 'regrav_vin', name: 'Regravação de Vin (Chassi)', price: 175.00 },
             { id: 'grav_motor', name: 'Gravação, Regravação de Motor', price: 175.00 },
@@ -500,14 +535,14 @@
         ];
 
         // ------------------------------------
-        // 3. INICIALIZAÇÃO DO SISTEMA
+        // 4. INICIALIZAÇÃO
         // ------------------------------------
         window.onload = function() {
-            // Configura tecla ENTER para login
+            // Habilita Login com Enter
             document.getElementById('login-user').addEventListener('keypress', e => { if(e.key==='Enter') performLogin() });
             document.getElementById('login-pass').addEventListener('keypress', e => { if(e.key==='Enter') performLogin() });
-            
-            // Gera a lista de serviços fixos no HTML
+
+            // Gera Lista de Serviços Fixos
             const container = document.getElementById('services-container');
             const defaultChecked = ['transf_nome', 'web', 'vistoria'];
 
@@ -528,12 +563,6 @@
                 container.appendChild(div);
             });
 
-            // Ativa visualmente o item de Honorários (padrão)
-            ['honorarios-chk'].forEach(id => { 
-                const c = document.getElementById(id); 
-                if(c && c.checked) c.closest('.service-item').classList.add('active'); 
-            });
-
             // Máscara de Placa (AAA-1234)
             document.getElementById('plate').addEventListener('input', e => { 
                 let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); 
@@ -542,48 +571,21 @@
                 e.target.value = v; 
             });
 
-            // Monitora mudanças para atualizar total em tempo real
+            // Atualiza total ao digitar
             document.getElementById('app-screen').addEventListener('input', calculateLiveTotal);
             calculateLiveTotal();
         };
 
         // ------------------------------------
-        // 4. FUNÇÕES DE AUTENTICAÇÃO
-        // ------------------------------------
-        function performLogin() {
-            const u = document.getElementById('login-user').value.toUpperCase().trim();
-            const p = document.getElementById('login-pass').value.trim();
-            const f = team.find(x => x.user === u && x.pass === p);
-            
-            if(f){ 
-                currentAttendant = f.name; 
-                document.getElementById('attendant-badge').innerText = `👤 ${f.name}`; 
-                document.getElementById('display-attendant').innerText = f.name; 
-                
-                // Troca Tela
-                document.getElementById('login-screen').style.display = 'none'; 
-                document.getElementById('app-screen').style.display = 'block'; 
-                
-                // Carrega histórico se houver
-                renderHistory(); 
-            } else { 
-                document.getElementById('login-error').style.display = 'block'; 
-            }
-        }
-
-        // ------------------------------------
-        // 5. LÓGICA DE NEGÓCIO E UI
+        // 5. LÓGICA DE NEGÓCIO
         // ------------------------------------
         
-        /**
-         * Controla a visibilidade dos campos com base no tipo de orçamento.
-         * Se não for Transferência Completa, esconde os campos de transf.
-         */
+        // Alterna entre os tipos de orçamento (Transferência vs Outros)
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
             const transferRows = ['transf_nome', 'transf_cidade', 'transf_bahia'];
             
-            // 1. Lógica de Visibilidade (Mostrar/Esconder)
+            // 1. Controla Visibilidade da Transferência
             if (type === 'transferencia') { 
                 transferRows.forEach(id => { 
                     const r = document.getElementById(`row-${id}`); 
@@ -596,25 +598,41 @@
                 }); 
             }
             
-            // 2. Reseta seleções
+            // 2. Reseta todas as seleções fixas
             document.querySelectorAll('.std-service').forEach(chk => chk.checked = false);
             
+            // 3. Reseta seleções manuais especiais (Para não ficar "preso" marcado)
+            ['mudanca-cat-chk', 'alt-carac-chk'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.checked = false;
+                    el.closest('.service-item').classList.remove('active');
+                }
+            });
+
+            // Função auxiliar para marcar checkbox fixo
             const setCheck = (id) => { const r = document.getElementById(`row-${id}`); if(r) r.querySelector('input').checked = true; };
             
-            // 3. Marca os itens padrão de acordo com o tipo
+            // 4. Aplica lógica específica
             if (type === 'transferencia') { setCheck('transf_nome'); setCheck('web'); setCheck('vistoria'); } 
             else if (type === 'segunda_via') { setCheck('segunda_crv'); setCheck('web'); setCheck('vistoria'); }
             else if (type === 'subst_motor') { setCheck('subst_motor'); setCheck('web'); setCheck('vistoria'); }
             else if (type === 'grav_motor') { setCheck('grav_motor'); setCheck('web'); setCheck('vistoria'); }
             else if (type === 'regrav_vin') { setCheck('regrav_vin'); setCheck('web'); setCheck('vistoria'); }
-            else if (type === 'mudanca_cat') { setCheck('mudanca_cat'); setCheck('web'); setCheck('vistoria'); }
+            else if (type === 'mudanca_cat') {
+                // Marca o checkbox manual de mudança de categoria
+                const chk = document.getElementById('mudanca-cat-chk');
+                if(chk) { 
+                    chk.checked = true; 
+                    document.getElementById('mudanca-cat-item').classList.add('active'); 
+                }
+                setCheck('web'); setCheck('vistoria');
+            }
             
             calculateLiveTotal();
         }
 
-        /**
-         * Abre/Fecha os campos editáveis (accordion)
-         */
+        // Abre/Fecha itens editáveis (Accordion)
         function toggleEditable(id, cid) { 
             const c = document.getElementById(id); 
             const ct = document.getElementById(cid); 
@@ -630,18 +648,16 @@
             }, 10); 
         }
 
-        /**
-         * Soma tudo que está checado na tela
-         */
+        // Calcula total em tempo real
         function calculateLiveTotal() { 
             let t = 0; 
-            // Soma fixos (apenas visíveis)
+            // Soma Fixos
             document.querySelectorAll('.std-service:checked').forEach(c => { 
                 if(c.closest('.service-item').style.display !== 'none') t += parseFloat(c.value); 
             });
             
-            // Soma variáveis
-            const keys = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            // Soma Variáveis (Incluindo os novos campos)
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c && c.checked) t += parseFloat(document.getElementById(k+'-price').value.replace(',','.')) || 0; 
@@ -652,17 +668,16 @@
 
         function formatMoney(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
-        // ------------------------------------
-        // 6. GESTÃO DE FORMULÁRIO (LIMPEZA)
-        // ------------------------------------
+        // Limpa campos para novo orçamento
         function clearFields() {
             document.getElementById('plate').value = ''; 
             document.getElementById('budget-type').value = 'transferencia'; 
-            document.getElementById('custom-title').value = '';
+            document.getElementById('custom-title').value = ''; 
             
             document.querySelectorAll('.std-service').forEach(c => c.checked = false);
             
-            const keys = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            // Limpa Variáveis
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c) c.checked = false; 
@@ -670,14 +685,16 @@
                 if(ct) ct.classList.remove('active'); 
             });
             
-            // Restaura padrão
+            // Restaura Padrão
             document.getElementById('honorarios-chk').checked = true; 
             document.getElementById('honorarios-item').classList.add('active');
             
-            // Resets manuais de valor
+            // Resets Manuais de Texto/Valor
             document.getElementById('multas-price').value = ''; document.getElementById('multas-desc').value = '';
             document.getElementById('atpv-price').value = '95.00'; document.getElementById('atpv-desc').value = 'ATPV-e';
-            document.getElementById('alt-carac-price').value = '149.00'; document.getElementById('alt-carac-desc').value = '';
+            document.getElementById('alt-carac-price').value = '149.00'; document.getElementById('alt-carac-desc').value ='';
+            document.getElementById('mudanca-cat-price').value = '324.00'; document.getElementById('mudanca-cat-desc').value ='';
+            document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento e IPVA 2025';
             document.getElementById('others-price').value = ''; document.getElementById('others-desc').value = '';
             
             toggleServiceType();
@@ -686,9 +703,7 @@
         function resetForm() { if(confirm("Deseja limpar todos os campos?")) clearFields(); }
         function startNewBudget() { if(confirm("Iniciar um NOVO orçamento?")) { clearFields(); editBudget(); } }
 
-        // ------------------------------------
-        // 7. GERAÇÃO DO ORÇAMENTO (TABELA)
-        // ------------------------------------
+        // Gera a tabela final
         function generateBudget() {
             const p = document.getElementById('plate').value.toUpperCase(); 
             if(!p) { alert("Digite a placa!"); return; }
@@ -705,8 +720,8 @@
                 } 
             });
 
-            // Coleta Variáveis
-            const keys = ['honorarios', 'licensing', 'atpv', 'multas', 'alt-carac', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            // Coleta Variáveis (Incluindo os novos)
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c && c.checked) { 
@@ -719,27 +734,25 @@
 
             if(!items.length) { alert("Selecione algo!"); return; }
 
-            // Renderiza HTML da Tabela
             const tb = document.getElementById('budget-items'); tb.innerHTML = '';
             items.forEach(i => tb.innerHTML += `<tr><td>${i.n}</td><td>${formatMoney(i.v)}</td></tr>`);
             
-            // Preenche dados finais
             document.getElementById('display-plate').innerText = p; 
             document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR'); 
             document.getElementById('display-total').innerText = formatMoney(t);
             
-            // Lógica do Título Personalizado
+            // Define Título
             const custT = document.getElementById('custom-title').value.toUpperCase();
             const typeSel = document.getElementById('budget-type');
             const typeText = typeSel.options[typeSel.selectedIndex].text;
+            const titleEl = document.getElementById('final-title');
             const subTitleEl = document.getElementById('display-type');
             
-            document.getElementById('final-title').innerText = "ORÇAMENTO";
+            titleEl.innerText = "ORÇAMENTO";
             
             if(custT && custT.trim() !== "") subTitleEl.innerText = custT;
             else subTitleEl.innerText = (typeSel.value === 'transferencia') ? "TRANSFERÊNCIA (COMPLETA)" : typeText.toUpperCase();
 
-            // Mostra tela de resultado
             document.getElementById('app-screen').style.display = 'none'; 
             document.getElementById('result-screen').style.display = 'block';
         }
@@ -750,9 +763,8 @@
         }
 
         // ------------------------------------
-        // 8. EXPORTAÇÃO E HISTÓRICO
+        // 6. FUNCIONALIDADES EXTRAS
         // ------------------------------------
-        
         function copyToClipboard() {
             const p = document.getElementById('display-plate').innerText; 
             const t = document.getElementById('display-total').innerText; 
@@ -774,22 +786,22 @@
             }); 
         }
 
-        // Salva orçamento atual no LocalStorage
+        // Histórico Local (LocalStorage)
         function saveToHistory() {
-            const plate = document.getElementById('display-plate').innerText;
-            const total = document.getElementById('display-total').innerText;
-            const type = document.getElementById('display-type').innerText;
+            const plate = document.getElementById('display-plate').innerText; 
+            const total = document.getElementById('display-total').innerText; 
+            const type = document.getElementById('display-type').innerText; 
             const attendant = currentAttendant;
             
-            const budgetData = {
-                plate, total, type, attendant,
-                html: document.getElementById('budget-items').innerHTML,
-                timestamp: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+            const budgetData = { 
+                plate, total, type, attendant, 
+                html: document.getElementById('budget-items').innerHTML, 
+                timestamp: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}) 
             };
 
             let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
             history.unshift(budgetData); 
-            if(history.length > 5) history.pop(); // Limite de 5 itens
+            if(history.length > 5) history.pop(); 
             localStorage.setItem('budgetHistory', JSON.stringify(history));
             
             alert("Salvo!");
@@ -797,18 +809,16 @@
             editBudget(); 
         }
 
-        // Renderiza a lista de histórico na tela inicial
         function renderHistory() {
-            const historyList = document.getElementById('history-list');
-            const historySection = document.getElementById('history-section');
+            const list = document.getElementById('history-list'); 
+            const section = document.getElementById('history-section');
             let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
             
-            if(history.length === 0) { historySection.style.display = 'none'; return; }
-            historySection.style.display = 'block';
-            historyList.innerHTML = '';
+            if(history.length === 0) { section.style.display = 'none'; return; }
+            section.style.display = 'block'; list.innerHTML = '';
 
             history.forEach((item, index) => {
-                const div = document.createElement('div');
+                const div = document.createElement('div'); 
                 div.className = 'history-card';
                 div.innerHTML = `
                     <div class="history-info" onclick="restoreBudget(${index})">
@@ -819,30 +829,29 @@
                         <button onclick="deleteHistory(${index})" style="color:red;">&times;</button>
                     </div>
                 `;
-                historyList.appendChild(div);
+                list.appendChild(div);
             });
         }
 
-        // Recupera um orçamento do histórico para a tela de resultado
         function restoreBudget(index) {
-            let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
-            const item = history[index];
+            let history = JSON.parse(localStorage.getItem('budgetHistory')) || []; 
+            const item = history[index]; 
             if(!item) return;
 
-            document.getElementById('display-plate').innerText = item.plate;
-            document.getElementById('display-total').innerText = item.total;
-            document.getElementById('display-type').innerText = item.type;
-            document.getElementById('display-attendant').innerText = item.attendant;
+            document.getElementById('display-plate').innerText = item.plate; 
+            document.getElementById('display-total').innerText = item.total; 
+            document.getElementById('display-type').innerText = item.type; 
+            document.getElementById('display-attendant').innerText = item.attendant; 
             document.getElementById('budget-items').innerHTML = item.html;
             
-            document.getElementById('app-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'none'; 
             document.getElementById('result-screen').style.display = 'block';
         }
 
         function deleteHistory(index) {
             let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
-            history.splice(index, 1);
-            localStorage.setItem('budgetHistory', JSON.stringify(history));
+            history.splice(index, 1); 
+            localStorage.setItem('budgetHistory', JSON.stringify(history)); 
             renderHistory();
         }
     </script>
