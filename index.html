@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Orçamento Prime LM - Versão Final</title>
+    <title>Gerador de Orçamento Prime LM</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -11,13 +11,13 @@
 
     <style>
         :root {
-            --app-primary: #1f2937; /* Cor Principal (Cinza Escuro) */
-            --gold: #D4AF37;       /* Dourado da Marca */
+            --app-primary: #1f2937; /* Cinza Escuro Profissional */
+            --gold: #D4AF37;       /* Dourado da Identidade Visual */
             --black: #111111;
             --white: #ffffff;
-            --bg: #f3f4f6;
-            --border: #e5e7eb;
-            --error: #ef4444;
+            --bg: #f3f4f6;         /* Fundo cinza claro */
+            --border: #e5e7eb;     /* Cor das bordas */
+            --error: #ef4444;      /* Vermelho de erro */
         }
 
         body {
@@ -44,14 +44,22 @@
             margin-top: 20px;
         }
 
+        /* LOGOTIPO NA TELA DE LOGIN */
+        .login-logo {
+            display: block;
+            margin: 0 auto 20px auto;
+            max-width: 180px;
+            height: auto;
+        }
+
         h1 { margin-top: 0; font-size: 1.5rem; text-align: center; color: var(--app-primary); }
 
-        /* --- CONTROLE DE TELAS --- */
+        /* --- CONTROLE DE EXIBIÇÃO DE TELAS --- */
         #app-screen { display: none; }
         #login-screen { display: block; }
         #result-screen { display: none; }
 
-        /* --- FORMULÁRIOS --- */
+        /* --- ESTILOS DE FORMULÁRIO --- */
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
         
@@ -66,10 +74,11 @@
             margin-bottom: 10px;
         }
         
+        /* Formatação especial para Placa e Título */
         #plate { text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         #custom-title { border-color: var(--gold); background-color: #fffbf0; }
 
-        /* --- LISTA DE SERVIÇOS (CSS GRID) --- */
+        /* --- LISTA DE SERVIÇOS (GRID) --- */
         .services-list { display: grid; gap: 10px; margin-top: 15px; }
 
         .service-item {
@@ -82,23 +91,22 @@
             transition: all 0.2s;
         }
         
-        /* Cabeçalho do item (Checkbox + Nome + Preço) */
         .service-header { display: flex; align-items: center; width: 100%; cursor: pointer; }
         .service-header input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); accent-color: var(--gold); }
         .service-name { flex-grow: 1; }
         .price-tag { font-weight: bold; color: var(--app-primary); }
 
-        /* Área Editável (Escondida por padrão) */
+        /* --- CAMPOS EDITÁVEIS (Accordion) --- */
         .editable-inputs {
-            display: none;
+            display: none; /* Escondido por padrão */
             margin-top: 10px;
             gap: 10px;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 2fr 1fr; /* Descrição ocupa mais espaço que valor */
             padding-top: 10px;
             border-top: 1px dashed #ddd;
         }
         
-        /* Quando item está ativo (marcado) */
+        /* Estilo quando o item está selecionado */
         .service-item.active { background-color: #fffbf0; border-color: var(--gold); }
         .service-item.active .editable-inputs { display: grid; }
 
@@ -148,14 +156,8 @@
         .btn-outline:hover { background: #eee; }
         
         .btn-reset {
-            background: transparent;
-            border: none;
-            color: #666;
-            text-decoration: underline;
-            font-size: 0.9rem;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
+            background: transparent; border: none; color: #666; text-decoration: underline;
+            font-size: 0.9rem; cursor: pointer; margin-top: 10px; width: 100%;
         }
 
         .error-msg { color: var(--error); text-align: center; margin-top: 10px; display: none; font-weight: bold;}
@@ -183,9 +185,11 @@
         .history-card:hover { transform: translateX(5px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .history-info strong { display: block; font-size: 1rem; }
         .history-info span { font-size: 0.8rem; color: #666; }
-        .history-actions button { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        .history-actions button {
+            background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;
+        }
 
-        /* --- FOLHA DE ORÇAMENTO (RESULTADO) --- */
+        /* --- FOLHA DE ORÇAMENTO (O que vai ser impresso/imagem) --- */
         .budget-paper {
             background: white;
             padding: 40px;
@@ -213,10 +217,11 @@
         .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
         .full-width { grid-column: span 2; }
 
-        /* --- CONFIGURAÇÃO DE IMPRESSÃO --- */
+        /* --- CONFIGURAÇÃO PARA IMPRESSÃO (CTRL+P) --- */
         @media print {
             body { background-color: white; display: block; margin: 0; padding: 0; }
             .container { box-shadow: none; max-width: 100%; width: 100%; margin: 0; padding: 0; border-radius: 0; }
+            /* Esconde tudo que não for o orçamento */
             .actions, .btn, .btn-reset, #login-screen, #app-screen, #history-section { display: none !important; }
             #result-screen { display: block !important; }
             .budget-paper { border: none; padding: 0; margin: 0; }
@@ -228,6 +233,8 @@
     <div class="container">
         
         <div id="login-screen">
+            <img src="https://via.placeholder.com/200x80/ffffff/000000?text=LOGO+PRIME+LM" alt="Logo Prime LM" class="login-logo">
+            
             <h1 style="color: var(--gold);">ACESSO RESTRITO</h1>
             <p style="text-align:center; margin-bottom: 30px;">Entre com suas credenciais</p>
             
@@ -265,6 +272,7 @@
                     <option value="grav_motor">Gravação/Regravação de Motor</option>
                     <option value="regrav_vin">Regravação de Vin (Chassi)</option>
                     <option value="mudanca_cat">Mudança de Categoria</option>
+                    <option value="alt_carac">Alteração de Característica</option> 
                 </select>
             </div>
 
@@ -284,7 +292,7 @@
                         <span class="service-name">Alteração de Característica</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="alt-carac-desc" placeholder="Especifique (Ex: Cor, Blindagem)">
+                        <input type="text" id="alt-carac-desc" value="Alteração de Característica" placeholder="Especifique (Ex: Cor, Blindagem)">
                         <input type="number" id="alt-carac-price" value="149.00" step="0.01">
                     </div>
                 </div>
@@ -295,7 +303,7 @@
                         <span class="service-name">Mudança de Categoria</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="mudanca-cat-desc" placeholder="Ex: De Aluguel p/ Particular">
+                        <input type="text" id="mudanca-cat-desc" value="Mudança de Categoria" placeholder="Ex: De Aluguel p/ Particular">
                         <input type="number" id="mudanca-cat-price" value="324.00" step="0.01">
                     </div>
                 </div>
@@ -321,7 +329,7 @@
                         <span class="service-name">Licenciamento Anterior</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="licensing-ant-desc" value="Licenciamento e IPVA 2025">
+                        <input type="text" id="licensing-ant-desc" value="Licenciamento Anterior">
                         <input type="number" id="licensing-ant-price" placeholder="Valor" step="0.01">
                     </div>
                 </div>
@@ -414,8 +422,7 @@
 
             <div id="history-section">
                 <h3 style="color:#666; font-size:1rem; border-bottom:1px solid #ddd; padding-bottom:5px;">Histórico Recente</h3>
-                <div id="history-list">
-                    </div>
+                <div id="history-list"></div>
             </div>
         </div>
 
@@ -425,7 +432,6 @@
             <div id="capture-area" class="budget-paper">
                 <div class="budget-header">
                     <h2 class="budget-title" id="final-title">ORÇAMENTO</h2>
-                    
                     <p class="plate-display" id="display-plate">AAA-0000</p>
                     <p style="margin:0; font-size: 0.9rem; color: #555;">Data: <span id="display-date"></span></p>
                     <p style="margin:5px 0 0 0; font-size: 0.8rem; font-weight:bold; color:var(--app-primary);" id="display-type"></p>
@@ -458,15 +464,12 @@
                 <button class="btn" onclick="downloadImage()">
                     Baixar Imagem (PNG)
                 </button>
-                
                 <button class="btn" style="background-color: #4b5563; border-color:#4b5563; color:white;" onclick="saveToHistory()">
                     💾 Salvar para Depois
                 </button>
-                
                 <button class="btn" style="background-color: var(--app-primary); color: var(--gold); border-color: var(--app-primary);" onclick="startNewBudget()">
                     ✨ Novo Orçamento
                 </button>
-                
                 <button class="btn btn-outline full-width" onclick="editBudget()">
                     Voltar / Editar
                 </button>
@@ -476,7 +479,7 @@
 
     <script>
         // ------------------------------------
-        // 1. CONFIGURAÇÃO DE USUÁRIOS
+        // 1. CONFIGURAÇÃO DE EQUIPE
         // ------------------------------------
         const team = [
             { user: 'SS', pass: 'sssal', name: 'S.S' },
@@ -489,37 +492,13 @@
             { user: 'A', pass: 'pexe', name: 'Augusto' },
             { user: 'IJ', pass: 'pexe', name: 'I.J' },
         ];
-
         let currentAttendant = '';
 
         // ------------------------------------
-        // 2. FUNÇÕES DE LOGIN (Com Tecla Enter)
+        // 2. SERVIÇOS FIXOS AUTOMÁTICOS
         // ------------------------------------
-        function performLogin() {
-            const u = document.getElementById('login-user').value.toUpperCase().trim();
-            const p = document.getElementById('login-pass').value.trim();
-            const f = team.find(x => x.user === u && x.pass === p);
-            
-            if(f){ 
-                currentAttendant = f.name; 
-                document.getElementById('attendant-badge').innerText = `👤 ${f.name}`; 
-                document.getElementById('display-attendant').innerText = f.name; 
-                
-                document.getElementById('login-screen').style.display = 'none'; 
-                document.getElementById('app-screen').style.display = 'block'; 
-                document.getElementById('login-error').style.display = 'none'; 
-                
-                renderHistory(); // Carrega histórico salvo
-            } else { 
-                document.getElementById('login-error').style.display = 'block'; 
-            }
-        }
-
-        // ------------------------------------
-        // 3. DADOS DE SERVIÇOS (Lista Automática)
-        // ------------------------------------
-        // Obs: "Alteração de Característica" e "Mudança de Categoria" foram removidos daqui
-        // pois agora são itens editáveis manuais (não simples checkboxes fixos).
+        // Obs: Mudança de Categoria e Alteração de Característica foram removidos daqui
+        // pois agora são editáveis manualmente.
         const servicesData = [
             { id: 'transf_nome', name: 'Transferência de Nome', price: 306.00 },
             { id: 'transf_cidade', name: 'Transferência de Cidade', price: 167.00 },
@@ -535,14 +514,14 @@
         ];
 
         // ------------------------------------
-        // 4. INICIALIZAÇÃO
+        // 3. INICIALIZAÇÃO
         // ------------------------------------
         window.onload = function() {
-            // Habilita Login com Enter
+            // Habilita Login com tecla Enter
             document.getElementById('login-user').addEventListener('keypress', e => { if(e.key==='Enter') performLogin() });
             document.getElementById('login-pass').addEventListener('keypress', e => { if(e.key==='Enter') performLogin() });
 
-            // Gera Lista de Serviços Fixos
+            // Gera a lista de serviços fixos (apenas checkboxes)
             const container = document.getElementById('services-container');
             const defaultChecked = ['transf_nome', 'web', 'vistoria'];
 
@@ -563,6 +542,12 @@
                 container.appendChild(div);
             });
 
+            // Ativa visualmente o item de Honorários (padrão)
+            ['honorarios-chk'].forEach(id => { 
+                const c = document.getElementById(id); 
+                if(c && c.checked) c.closest('.service-item').classList.add('active'); 
+            });
+
             // Máscara de Placa (AAA-1234)
             document.getElementById('plate').addEventListener('input', e => { 
                 let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); 
@@ -577,15 +562,38 @@
         };
 
         // ------------------------------------
+        // 4. FUNÇÕES DE LOGIN
+        // ------------------------------------
+        function performLogin() {
+            const u = document.getElementById('login-user').value.toUpperCase().trim();
+            const p = document.getElementById('login-pass').value.trim();
+            const f = team.find(x => x.user === u && x.pass === p);
+            
+            if(f){ 
+                currentAttendant = f.name; 
+                document.getElementById('attendant-badge').innerText = `👤 ${f.name}`; 
+                document.getElementById('display-attendant').innerText = f.name; 
+                document.getElementById('login-screen').style.display = 'none'; 
+                document.getElementById('app-screen').style.display = 'block'; 
+                document.getElementById('login-error').style.display = 'none'; 
+                renderHistory(); // Carrega histórico
+            } else { 
+                document.getElementById('login-error').style.display = 'block'; 
+            }
+        }
+
+        // ------------------------------------
         // 5. LÓGICA DE NEGÓCIO
         // ------------------------------------
         
-        // Alterna entre os tipos de orçamento (Transferência vs Outros)
+        /**
+         * Controla a visibilidade e seleção automática com base no Menu Principal
+         */
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
             const transferRows = ['transf_nome', 'transf_cidade', 'transf_bahia'];
             
-            // 1. Controla Visibilidade da Transferência
+            // 1. Controla Visibilidade da Transferência (Mostra/Esconde)
             if (type === 'transferencia') { 
                 transferRows.forEach(id => { 
                     const r = document.getElementById(`row-${id}`); 
@@ -598,10 +606,10 @@
                 }); 
             }
             
-            // 2. Reseta todas as seleções fixas
+            // 2. Reseta todas as seleções fixas (Checkboxes padrão)
             document.querySelectorAll('.std-service').forEach(chk => chk.checked = false);
             
-            // 3. Reseta seleções manuais especiais (Para não ficar "preso" marcado)
+            // 3. CORREÇÃO SOLICITADA: Reseta os itens editáveis especiais para não ficarem "presos"
             ['mudanca-cat-chk', 'alt-carac-chk'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) {
@@ -613,18 +621,27 @@
             // Função auxiliar para marcar checkbox fixo
             const setCheck = (id) => { const r = document.getElementById(`row-${id}`); if(r) r.querySelector('input').checked = true; };
             
-            // 4. Aplica lógica específica
+            // 4. Aplica lógica baseada na escolha
             if (type === 'transferencia') { setCheck('transf_nome'); setCheck('web'); setCheck('vistoria'); } 
             else if (type === 'segunda_via') { setCheck('segunda_crv'); setCheck('web'); setCheck('vistoria'); }
             else if (type === 'subst_motor') { setCheck('subst_motor'); setCheck('web'); setCheck('vistoria'); }
             else if (type === 'grav_motor') { setCheck('grav_motor'); setCheck('web'); setCheck('vistoria'); }
             else if (type === 'regrav_vin') { setCheck('regrav_vin'); setCheck('web'); setCheck('vistoria'); }
             else if (type === 'mudanca_cat') {
-                // Marca o checkbox manual de mudança de categoria
+                // Marca automaticamente o checkbox manual de Mudança de Categoria
                 const chk = document.getElementById('mudanca-cat-chk');
                 if(chk) { 
                     chk.checked = true; 
                     document.getElementById('mudanca-cat-item').classList.add('active'); 
+                }
+                setCheck('web'); setCheck('vistoria');
+            }
+            else if (type === 'alt_carac') {
+                // Marca automaticamente o checkbox manual de Alteração de Característica
+                const chk = document.getElementById('alt-carac-chk');
+                if(chk) { 
+                    chk.checked = true; 
+                    document.getElementById('alt-carac-item').classList.add('active'); 
                 }
                 setCheck('web'); setCheck('vistoria');
             }
@@ -656,7 +673,7 @@
                 if(c.closest('.service-item').style.display !== 'none') t += parseFloat(c.value); 
             });
             
-            // Soma Variáveis (Incluindo os novos campos)
+            // Soma Variáveis (Lista Atualizada com novos campos)
             const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
@@ -676,7 +693,6 @@
             
             document.querySelectorAll('.std-service').forEach(c => c.checked = false);
             
-            // Limpa Variáveis
             const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
@@ -692,9 +708,9 @@
             // Resets Manuais de Texto/Valor
             document.getElementById('multas-price').value = ''; document.getElementById('multas-desc').value = '';
             document.getElementById('atpv-price').value = '95.00'; document.getElementById('atpv-desc').value = 'ATPV-e';
-            document.getElementById('alt-carac-price').value = '149.00'; document.getElementById('alt-carac-desc').value ='';
-            document.getElementById('mudanca-cat-price').value = '324.00'; document.getElementById('mudanca-cat-desc').value ='';
-            document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento e IPVA 2025';
+            document.getElementById('alt-carac-price').value = '149.00'; document.getElementById('alt-carac-desc').value = 'Alteração de Característica';
+            document.getElementById('mudanca-cat-price').value = '324.00'; document.getElementById('mudanca-cat-desc').value = 'Mudança de Categoria';
+            document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento Anterior';
             document.getElementById('others-price').value = ''; document.getElementById('others-desc').value = '';
             
             toggleServiceType();
@@ -720,7 +736,7 @@
                 } 
             });
 
-            // Coleta Variáveis (Incluindo os novos)
+            // Coleta Variáveis
             const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
