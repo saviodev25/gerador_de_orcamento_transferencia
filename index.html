@@ -366,18 +366,28 @@
                     </div>
                     <div class="editable-inputs">
                         <input type="text" id="placa-moto-desc" value="Placa Mercosul (Moto)">
-                        <input type="number" id="placa-moto-price" value="198.00" step="0.01">
+                        <input type="number" id="placa-moto-price" value="217.00" step="0.01">
                     </div>
                 </div>
 
                 <div class="service-item" id="placa-carro-item">
                     <div class="service-header" onclick="toggleEditable('placa-carro-chk', 'placa-carro-item')">
                         <input type="checkbox" id="placa-carro-chk">
-                        <span class="service-name">Placa Mercosul (Carro)</span>
+                        <span class="service-name">Placas Mercosul (Carro)</span>
                     </div>
                     <div class="editable-inputs">
                         <input type="text" id="placa-carro-desc" value="Placas Mercosul (Carro)">
-                        <input type="number" id="placa-carro-price" value="335.00" step="0.01">
+                        <input type="number" id="placa-carro-price" value="360.00" step="0.01">
+                    </div>
+                </div>
+                <div class="service-item" id="un-carro-item">
+                    <div class="service-header" onclick="toggleEditable('un-carro-chk', 'un-carro-item')">
+                        <input type="checkbox" id="un-carro-chk">
+                        <span class="service-name">Unidade Placa Mercosul (Carro)</span>
+                    </div>
+                    <div class="editable-inputs">
+                        <input type="text" id="un-carro-desc" value="Unidade Placa Mercosul (Carro)">
+                        <input type="number" id="un-carro-price" value="190.00" step="0.01"> 
                     </div>
                 </div>
 
@@ -660,7 +670,7 @@
             });
             
             // Soma Variáveis (Incluindo os novos campos)
-            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'un-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c && c.checked) t += parseFloat(document.getElementById(k+'-price').value.replace(',','.')) || 0; 
@@ -679,7 +689,7 @@
             
             document.querySelectorAll('.std-service').forEach(c => c.checked = false);
             
-            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'un-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c) c.checked = false; 
@@ -723,7 +733,7 @@
             });
 
             // Coleta Variáveis (Incluindo os novos)
-            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'un-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c && c.checked) { 
