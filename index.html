@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Orçamento Prime LM - Versão Final</title>
+    <title>Gerador de Orçamento Prime LM</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
@@ -332,7 +332,7 @@
                         <span class="service-name">Licenciamento</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="licensing-desc" value="LICENCIAMENTO E IPVA 2026 (IPVA 2026 COM DESCONTO DE 15% ATÉ 10/02)">
+                        <input type="text" id="licensing-desc" value="LICENCIAMENTO E IPVA 2026 (IPVA 2026 COM DESCONTO DE 15% ATÉ 25/02)">
                         <input type="number" id="licensing-price" value="181.00" step="0.01">
                     </div>
                 </div>
@@ -686,10 +686,10 @@
             document.getElementById('plate').value = ''; 
             document.getElementById('budget-type').value = 'transferencia'; 
             document.getElementById('custom-title').value = ''; 
-            
+                
             document.querySelectorAll('.std-service').forEach(c => c.checked = false);
             
-            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'un-carro', 'others', 'others2'];
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c) c.checked = false; 
@@ -697,16 +697,21 @@
                 if(ct) ct.classList.remove('active'); 
             });
             
-            // Restaura Padrão
+            // Restaura Padrão dos Checkboxes
             document.getElementById('honorarios-chk').checked = true; 
             document.getElementById('honorarios-item').classList.add('active');
             
-            // Resets Manuais de Texto/Valor
+            // --- CORREÇÃO: Reseta os valores para o padrão original ---
+            document.getElementById('honorarios-price').value = '120.00'; 
+            document.getElementById('licensing-price').value = '181.00';
+            // ----------------------------------------------------------
+            
+            // Resets Manuais de Texto/Valor dos outros campos
             document.getElementById('multas-price').value = ''; document.getElementById('multas-desc').value = '';
             document.getElementById('atpv-price').value = '95.00'; document.getElementById('atpv-desc').value = 'ATPV-e';
             document.getElementById('alt-carac-price').value = '149.00'; document.getElementById('alt-carac-desc').value = 'Alteração de Característica';
             document.getElementById('mudanca-cat-price').value = '324.00'; document.getElementById('mudanca-cat-desc').value = 'Mudança de Categoria';
-            document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento e IPVA 2025';
+            document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento Anterior';
             document.getElementById('others-price').value = ''; document.getElementById('others-desc').value = '';
             
             toggleServiceType();
