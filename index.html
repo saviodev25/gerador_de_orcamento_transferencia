@@ -332,7 +332,7 @@
                         <span class="service-name">Licenciamento</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="licensing-desc" value="LICENCIAMENTO E IPVA 2026 (IPVA 2026 COM DESCONTO DE 15% ATÉ 25/02)">
+                        <input type="text" id="licensing-desc" value="(Licenciamento e IPVA 2026 (IPVA 2026 COM DESCONTO DE 15% ATÉ 25/02))">
                         <input type="number" id="licensing-price" value="181.00" step="0.01">
                     </div>
                 </div>
@@ -354,7 +354,7 @@
                         <span class="service-name" style="color:#d32f2f;">MULTAS</span>
                     </div>
                     <div class="editable-inputs">
-                        <input type="text" id="multas-desc" placeholder="Descrição da Multa" value="">
+                        <input type="text" id="multas-desc" placeholder="Descrição da Multa" value="01 Multa obrigatória">
                         <input type="number" id="multas-price" placeholder="Valor total multas" step="0.01">
                     </div>
                 </div>
@@ -689,7 +689,7 @@
                 
             document.querySelectorAll('.std-service').forEach(c => c.checked = false);
             
-            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'others', 'others2'];
+            const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'un-carro', 'others', 'others2'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c) c.checked = false; 
@@ -704,14 +704,15 @@
             // --- CORREÇÃO: Reseta os valores para o padrão original ---
             document.getElementById('honorarios-price').value = '120.00'; 
             document.getElementById('licensing-price').value = '181.00';
+            document.getElementById('licensing-desc').value = 'Licenciamento e IPVA 2026 (IPVA 2026 COM DESCONTO DE 15% ATÉ 25/02)';
             // ----------------------------------------------------------
             
             // Resets Manuais de Texto/Valor dos outros campos
-            document.getElementById('multas-price').value = ''; document.getElementById('multas-desc').value = '';
+            document.getElementById('multas-price').value = ''; document.getElementById('multas-desc').value = '01 Multa obrigatória';
             document.getElementById('atpv-price').value = '95.00'; document.getElementById('atpv-desc').value = 'ATPV-e';
             document.getElementById('alt-carac-price').value = '149.00'; document.getElementById('alt-carac-desc').value = 'Alteração de Característica';
             document.getElementById('mudanca-cat-price').value = '324.00'; document.getElementById('mudanca-cat-desc').value = 'Mudança de Categoria';
-            document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento Anterior';
+            document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento e IPVA 2025';
             document.getElementById('others-price').value = ''; document.getElementById('others-desc').value = '';
             
             toggleServiceType();
