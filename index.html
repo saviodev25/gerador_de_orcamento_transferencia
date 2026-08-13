@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Orçamento Prime LM</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <title>Gerador de Orçamento</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root {
             --app-primary: #1f2937; /* Cor Principal (Cinza Escuro) */
-            --gold: #D4AF37;       /* Dourado da Marca */
-            --black: #111111;
+            --gold: #D4AF37;       /* Mantido para a interface interna */
+            --black: #000000;      /* Preto absoluto para as linhas */
             --white: #ffffff;
             --bg: #f3f4f6;
             --border: #e5e7eb;
             --error: #ef4444;
+            --neutral-accent: #6b7280; /* Cor sutil para o documento final */
         }
 
         body {
@@ -54,7 +55,7 @@
         /* --- FORMULÁRIOS --- */
         .form-group { margin-bottom: 1rem; }
         label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
-        
+
         input[type="text"], input[type="password"], input[type="number"], select {
             width: 100%;
             padding: 12px;
@@ -65,7 +66,7 @@
             background-color: #fff;
             margin-bottom: 10px;
         }
-        
+
         #plate { text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         #custom-title { border-color: var(--gold); background-color: #fffbf0; }
 
@@ -81,7 +82,7 @@
             background: #fff;
             transition: all 0.2s;
         }
-        
+
         /* Cabeçalho do item (Checkbox + Nome + Preço) */
         .service-header { display: flex; align-items: center; width: 100%; cursor: pointer; }
         .service-header input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); accent-color: var(--gold); }
@@ -97,7 +98,7 @@
             padding-top: 10px;
             border-top: 1px dashed #ddd;
         }
-        
+
         /* Quando item está ativo (marcado) */
         .service-item.active { background-color: #fffbf0; border-color: var(--gold); }
         .service-item.active .editable-inputs { display: grid; }
@@ -146,7 +147,7 @@
         .btn:hover { opacity: 0.9; }
         .btn-outline { background: transparent; border: 2px solid var(--black); color: var(--black); }
         .btn-outline:hover { background: #eee; }
-        
+
         .btn-reset {
             background: transparent;
             border: none;
@@ -185,33 +186,129 @@
         .history-info span { font-size: 0.8rem; color: #666; }
         .history-actions button { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; }
 
-        /* --- FOLHA DE ORÇAMENTO (RESULTADO) --- */
+        /* --- NOVA FOLHA DE ORÇAMENTO (SaaS INVOICE STYLE - SUTIL E ANÔNIMO) --- */
         .budget-paper {
-            background: white;
+            background: #ffffff;
             padding: 40px;
-            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border: 1px solid #f3f4f6;
+            border-left: 8px solid var(--neutral-accent); 
             margin-bottom: 20px;
             position: relative;
+            overflow: hidden;
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact;
         }
-        .budget-paper::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
-            background: var(--gold);
-            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px dashed #e5e7eb;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
         }
-        .budget-header { text-align: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid var(--black); }
-        .budget-title { margin: 0; font-size: 1.8rem; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; font-weight: 700; text-shadow: 0px 1px 1px rgba(0,0,0,0.1); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .plate-display { font-size: 2rem; font-weight: 800; color: var(--black); margin: 10px 0; letter-spacing: 2px; }
 
-        .budget-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .budget-table th { text-align: left; padding: 12px; background-color: var(--black); color: var(--gold); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .budget-table td { padding: 12px; border-bottom: 1px solid #eee; color: #333; font-weight: 500; }
-        .budget-table td:last-child { text-align: right; font-weight: 700; color: var(--black); white-space: nowrap; }
+        .header-main { text-align: left; width: 100%; }
 
-        .total-row { background-color: var(--gold); color: var(--black); padding: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 1.4rem; font-weight: 800; margin-top: 20px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .attendant-signature { margin-top: 30px; text-align: center; font-size: 0.85rem; color: #666; border-top: 1px solid #eee; padding-top: 10px; }
+        .budget-title {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .plate-display {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--app-primary);
+            margin: 0;
+            line-height: 1.1;
+            letter-spacing: 2px;
+        }
+
+        .budget-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 30px; 
+        }
+        
+        .budget-table th {
+            text-align: left;
+            padding: 12px 10px;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .budget-table td { 
+            padding: 16px 10px; 
+            /* ALTERADO: Linha preta sólida abaixo de cada taxa */
+            border-bottom: 1px solid var(--black); 
+            color: #374151; 
+            font-weight: 500; 
+            font-size: 0.95rem; 
+        }
+        
+        .budget-table td:last-child { 
+            text-align: right; 
+            font-weight: 700; 
+            color: var(--app-primary); 
+        }
+
+        .total-section {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .total-row {
+            background-color: #f8fafc; 
+            color: var(--app-primary);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0; 
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact;
+        }
+
+        .total-label { 
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            opacity: 0.8; 
+            font-weight: 600;
+        }
+        
+        .total-value { 
+            font-size: 1.6rem; 
+            font-weight: 900; 
+            color: var(--app-primary); 
+            margin: 0; 
+        }
 
         .actions { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
         .full-width { grid-column: span 2; }
+
+        /* Helper para esconder elementos sem afetar o JS */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
 
         /* --- CONFIGURAÇÃO DE IMPRESSÃO --- */
         @media print {
@@ -219,23 +316,23 @@
             .container { box-shadow: none; max-width: 100%; width: 100%; margin: 0; padding: 0; border-radius: 0; }
             .actions, .btn, .btn-reset, #login-screen, #app-screen, #history-section { display: none !important; }
             #result-screen { display: block !important; }
-            .budget-paper { border: none; padding: 0; margin: 0; }
+            .budget-paper { border: none; padding: 0; margin: 0; box-shadow: none; border-left: 8px solid var(--neutral-accent); }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        
+
         <div id="login-screen">
             <h1 style="color: var(--gold);">ACESSO RESTRITO</h1>
             <p style="text-align:center; margin-bottom: 30px;">Entre com suas credenciais</p>
-            
+
             <div class="form-group">
                 <label>Usuário</label>
                 <input type="text" id="login-user" placeholder="Ex: LM" style="text-transform: uppercase;">
             </div>
-            
+
             <div class="form-group">
                 <label>Senha</label>
                 <input type="password" id="login-pass" placeholder="Sua senha">
@@ -251,7 +348,7 @@
                 <span id="attendant-badge" style="background:#eee; padding:5px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold;"></span>
             </div>
 
-            
+
             <div class="form-group">
                 <label>Placa do Veículo</label>
                 <input type="text" id="plate" placeholder="AAA-1234" maxlength="8">
@@ -266,7 +363,8 @@
                     <option value="grav_motor">Gravação/Regravação de Motor</option>
                     <option value="regrav_vin">Regravação de Vin (Chassi)</option>
                     <option value="mudanca_cat">Mudança de Categoria</option>
-                    <option value="alt_carac">Alteração de Característica</option> </select>
+                    <option value="alt_carac">Alteração de Característica</option> 
+                </select>
             </div>
 
             <div class="form-group">
@@ -278,7 +376,7 @@
             <div class="services-list" id="services-container"></div>
 
             <div class="services-list" style="margin-top: 10px;">
-                
+
                 <div class="service-item" id="alt-carac-item">
                     <div class="service-header" onclick="toggleEditable('alt-carac-chk', 'alt-carac-item')">
                         <input type="checkbox" id="alt-carac-chk">
@@ -304,7 +402,7 @@
 
             <div class="section-title">Serviços Variáveis</div>
             <div class="services-list">
-                
+
                 <div class="service-item" id="honorarios-item">
                     <div class="service-header" onclick="toggleEditable('honorarios-chk', 'honorarios-item')">
                         <input type="checkbox" id="honorarios-chk" checked>
@@ -441,33 +539,38 @@
 
         <div id="result-screen">
             <h1>Pronto!</h1>
-            
+
             <div id="capture-area" class="budget-paper">
                 <div class="budget-header">
-                    <h2 class="budget-title" id="final-title">ORÇAMENTO</h2>
-                    <p class="plate-display" id="display-plate">AAA-0000</p>
-                    <p style="margin:0; font-size: 0.9rem; color: #555;">Data: <span id="display-date"></span></p>
-                    <p style="margin:5px 0 0 0; font-size: 0.8rem; font-weight:bold; color:var(--app-primary);" id="display-type"></p>
+                    <div class="header-main">
+                        <h2 class="budget-title" id="final-title">ORÇAMENTO</h2>
+                        <p class="plate-display" id="display-plate">AAA-0000</p>
+                    </div>
                 </div>
 
                 <table class="budget-table">
                     <thead>
                         <tr>
                             <th>Descrição dos Serviços</th>
-                            <th>Valor</th>
+                            <th style="text-align: right;">Valor (R$)</th>
                         </tr>
                     </thead>
                     <tbody id="budget-items"></tbody>
                 </table>
 
-                <div class="total-row">
-                    <span>TOTAL</span>
-                    <span id="display-total">R$ 0,00</span>
+                <div class="total-section">
+                    <div class="total-row">
+                        <span class="total-label">Total Final</span>
+                        <span class="total-value" id="display-total">R$ 0,00</span>
+                    </div>
                 </div>
+            </div>
 
-                <div class="attendant-signature">
-                    At: <span id="display-attendant"></span>
-                </div>
+            <!-- Dados invisíveis necessários para que o botão "Copiar Texto" e o Histórico continuem funcionando normalmente sem aparecer na imagem -->
+            <div class="sr-only">
+                <span id="display-date"></span>
+                <span id="display-type"></span>
+                <span id="display-attendant"></span>
             </div>
 
             <div class="actions">
@@ -480,7 +583,7 @@
                 <button class="btn" style="background-color: #4b5563; border-color:#4b5563; color:white;" onclick="saveToHistory()">
                     💾 Salvar para Depois
                 </button>
-                <button class="btn" style="background-color: var(--app-primary); color: var(--gold); border-color: var(--app-primary);" onclick="startNewBudget()">
+                <button class="btn" style="background-color: var(--app-primary); color: var(--white); border-color: var(--app-primary);" onclick="startNewBudget()">
                     ✨ Novo Orçamento
                 </button>
                 <button class="btn btn-outline full-width" onclick="editBudget()">
@@ -543,9 +646,9 @@
                 const div = document.createElement('div'); 
                 div.className = 'service-item'; 
                 div.id = `row-${s.id}`; 
-                
+
                 const chk = defaultChecked.includes(s.id) ? 'checked' : '';
-                
+
                 div.innerHTML = `
                     <div class="service-header" onclick="this.querySelector('input').click()">
                         <input type="checkbox" value="${s.price}" data-name="${s.name}" class="std-service" ${chk}>
@@ -582,11 +685,11 @@
             const u = document.getElementById('login-user').value.toUpperCase().trim();
             const p = document.getElementById('login-pass').value.trim();
             const f = team.find(x => x.user === u && x.pass === p);
-            
+
             if(f){ 
                 currentAttendant = f.name; 
                 document.getElementById('attendant-badge').innerText = `👤 ${f.name}`; 
-                document.getElementById('display-attendant').innerText = f.name; 
+                // document.getElementById('display-attendant').innerText = f.name; // Removido
                 document.getElementById('login-screen').style.display = 'none'; 
                 document.getElementById('app-screen').style.display = 'block'; 
                 document.getElementById('login-error').style.display = 'none'; 
@@ -599,12 +702,12 @@
         // ------------------------------------
         // 5. LÓGICA DE NEGÓCIO
         // ------------------------------------
-        
+
         // Alterna entre os tipos de orçamento (Transferência vs Outros)
         function toggleServiceType() {
             const type = document.getElementById('budget-type').value;
             const transferRows = ['transf_nome', 'transf_cidade', 'transf_bahia'];
-            
+
             // 1. Controla Visibilidade da Transferência (Mostra/Esconde)
             if (type === 'transferencia') { 
                 transferRows.forEach(id => { 
@@ -617,10 +720,10 @@
                     if(r) { r.style.display = 'none'; r.querySelector('input').checked = false; } 
                 }); 
             }
-            
+
             // 2. Reseta todas as seleções fixas (Checkboxes padrão)
             document.querySelectorAll('.std-service').forEach(chk => chk.checked = false);
-            
+
             // 3. Reseta seleções manuais especiais (Para não ficar "preso" marcado)
             ['mudanca-cat-chk', 'alt-carac-chk'].forEach(id => {
                 const el = document.getElementById(id);
@@ -632,7 +735,7 @@
 
             // Função auxiliar para marcar checkbox fixo
             const setCheck = (id) => { const r = document.getElementById(`row-${id}`); if(r) r.querySelector('input').checked = true; };
-            
+
             // 4. Aplica lógica baseada na escolha
             if (type === 'transferencia') { setCheck('transf_nome'); setCheck('web'); setCheck('vistoria'); } 
             else if (type === 'segunda_via') { setCheck('segunda_crv'); setCheck('web'); setCheck('vistoria'); }
@@ -655,7 +758,7 @@
                 }
                 setCheck('web'); setCheck('vistoria');
             }
-            
+
             calculateLiveTotal();
         }
 
@@ -682,14 +785,14 @@
             document.querySelectorAll('.std-service:checked').forEach(c => { 
                 if(c.closest('.service-item').style.display !== 'none') t += parseFloat(c.value); 
             });
-            
+
             // Soma Variáveis (Incluindo os novos campos)
             const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'un-carro', 'others', 'others2', 'others3'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
                 if(c && c.checked) t += parseFloat(document.getElementById(k+'-price').value.replace(',','.')) || 0; 
             });
-            
+
             document.getElementById('live-total-value').innerText = formatMoney(t);
         }
 
@@ -700,9 +803,9 @@
             document.getElementById('plate').value = ''; 
             document.getElementById('budget-type').value = 'transferencia'; 
             document.getElementById('custom-title').value = ''; 
-                
+
             document.querySelectorAll('.std-service').forEach(c => c.checked = false);
-            
+
             const keys = ['honorarios', 'licensing', 'licensing-ant', 'atpv', 'multas', 'alt-carac', 'mudanca-cat', 'placa-moto', 'placa-carro', 'un-carro', 'others', 'others2','others3'];
             keys.forEach(k => { 
                 const c = document.getElementById(k+'-chk'); 
@@ -710,17 +813,17 @@
                 const ct = document.getElementById(k+'-item'); 
                 if(ct) ct.classList.remove('active'); 
             });
-            
+
             // Restaura Padrão dos Checkboxes
             document.getElementById('honorarios-chk').checked = true; 
             document.getElementById('honorarios-item').classList.add('active');
-            
+
             // --- CORREÇÃO: Reseta os valores para o padrão original ---
             document.getElementById('honorarios-price').value = '170.00'; 
             document.getElementById('licensing-price').value = '181.00';
             //document.getElementById('licensing-desc').value = 'Licenciamento e IPVA 2026 (IPVA 2026 COM DESCONTO DE 08% ATÉ 30/03/2026)';
             // ----------------------------------------------------------
-            
+
             // Resets Manuais de Texto/Valor dos outros campos
             document.getElementById('multas-price').value = ''; document.getElementById('multas-desc').value = '01 Multa obrigatória';
             document.getElementById('atpv-price').value = '110.00'; document.getElementById('atpv-desc').value = 'ATPV-e';
@@ -728,7 +831,7 @@
             document.getElementById('mudanca-cat-price').value = '324.00'; document.getElementById('mudanca-cat-desc').value = 'Mudança de Categoria';
             document.getElementById('licensing-ant-price').value = ''; document.getElementById('licensing-ant-desc').value = 'Licenciamento e IPVA 2025';
             document.getElementById('others-price').value = ''; document.getElementById('others-desc').value = '';
-            
+
             toggleServiceType();
         }
 
@@ -739,7 +842,7 @@
         function generateBudget() {
             const p = document.getElementById('plate').value.toUpperCase(); 
             if(!p) { alert("Digite a placa!"); return; }
-            
+
             const items = []; 
             let t = 0;
 
@@ -768,20 +871,20 @@
 
             const tb = document.getElementById('budget-items'); tb.innerHTML = '';
             items.forEach(i => tb.innerHTML += `<tr><td>${i.n}</td><td>${formatMoney(i.v)}</td></tr>`);
-            
+
             document.getElementById('display-plate').innerText = p; 
             document.getElementById('display-date').innerText = new Date().toLocaleDateString('pt-BR'); 
             document.getElementById('display-total').innerText = formatMoney(t);
-            
+
             // Define Título
             const custT = document.getElementById('custom-title').value.toUpperCase();
             const typeSel = document.getElementById('budget-type');
             const typeText = typeSel.options[typeSel.selectedIndex].text;
             const titleEl = document.getElementById('final-title');
             const subTitleEl = document.getElementById('display-type');
-            
+
             titleEl.innerText = "ORÇAMENTO";
-            
+
             if(custT && custT.trim() !== "") subTitleEl.innerText = custT;
             else subTitleEl.innerText = (typeSel.value === 'transferencia') ? "TRANSFERÊNCIA (COMPLETA)" : typeText.toUpperCase();
 
@@ -801,11 +904,11 @@
             const p = document.getElementById('display-plate').innerText; 
             const t = document.getElementById('display-total').innerText; 
             const st = document.getElementById('display-type').innerText;
-            
+
             let txt = `*${p}*\n*${st}*\n`;
             document.querySelectorAll('#budget-items tr').forEach(r => txt += `- ${r.cells[0].innerText}: ${r.cells[1].innerText}\n`);
             txt += `*TOTAL = ${t}*`;
-            
+
             navigator.clipboard.writeText(txt).then(() => alert("Copiado!"));
         }
 
@@ -824,7 +927,7 @@
             const total = document.getElementById('display-total').innerText; 
             const type = document.getElementById('display-type').innerText; 
             const attendant = currentAttendant;
-            
+
             const budgetData = { 
                 plate, total, type, attendant, 
                 html: document.getElementById('budget-items').innerHTML, 
@@ -835,7 +938,7 @@
             history.unshift(budgetData); 
             if(history.length > 5) history.pop(); 
             localStorage.setItem('budgetHistory', JSON.stringify(history));
-            
+
             alert("Salvo!");
             renderHistory();
             editBudget(); 
@@ -845,7 +948,7 @@
             const list = document.getElementById('history-list'); 
             const section = document.getElementById('history-section');
             let history = JSON.parse(localStorage.getItem('budgetHistory')) || [];
-            
+
             if(history.length === 0) { section.style.display = 'none'; return; }
             section.style.display = 'block'; list.innerHTML = '';
 
@@ -873,9 +976,9 @@
             document.getElementById('display-plate').innerText = item.plate; 
             document.getElementById('display-total').innerText = item.total; 
             document.getElementById('display-type').innerText = item.type; 
-            document.getElementById('display-attendant').innerText = item.attendant; 
+            // document.getElementById('display-attendant').innerText = item.attendant; // Removido
             document.getElementById('budget-items').innerHTML = item.html;
-            
+
             document.getElementById('app-screen').style.display = 'none'; 
             document.getElementById('result-screen').style.display = 'block';
         }
